@@ -56,6 +56,10 @@ All colors MUST be HSL.
     /* Success color for translation status */
     --success: 140 70% 50%;
     --success-foreground: 210 10% 98%;
+    
+    /* Warning color for translation loading */
+    --warning: 45 100% 60%;
+    --warning-foreground: 210 10% 98%;
 
     --radius: 0.5rem;
 
