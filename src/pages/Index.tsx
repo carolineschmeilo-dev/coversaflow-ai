@@ -45,7 +45,16 @@ const Index = () => {
               <Phone className="w-6 h-6 mr-2" />
               Start Demo Call
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-6 rounded-full">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="text-lg px-8 py-6 rounded-full"
+              onClick={() => {
+                document.getElementById('features')?.scrollIntoView({ 
+                  behavior: 'smooth' 
+                });
+              }}
+            >
               <Globe className="w-6 h-6 mr-2" />
               Learn More
             </Button>
@@ -53,7 +62,7 @@ const Index = () => {
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20">
+        <div id="features" className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20">
           <Card className="p-6 bg-gradient-to-br from-card to-muted/20 border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-4">
               <div className="w-12 h-12 bg-gradient-to-r from-primary to-primary-glow rounded-lg flex items-center justify-center">
