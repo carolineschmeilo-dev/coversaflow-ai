@@ -44,7 +44,7 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex justify-center">
             <Button 
               size="lg" 
               onClick={startCall}
@@ -52,17 +52,6 @@ const Index = () => {
             >
               <Phone className="w-6 h-6 mr-2" />
               Start Phone Translation
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="text-lg px-8 py-6 rounded-full"
-              onClick={() => {
-                window.open('mailto:support@conversaflow.ai?subject=ConversaFlow.AI Support', '_blank');
-              }}
-            >
-              <MessageCircle className="w-6 h-6 mr-2" />
-              Talk to Us
             </Button>
           </div>
         </div>
@@ -202,6 +191,24 @@ const Index = () => {
               <EarlyAccessSignup />
             </div>
           </div>
+        </div>
+
+        {/* Talk to Us Section */}
+        <div className="mt-16 text-center">
+          <Button 
+            variant="outline" 
+            size="lg" 
+            className="text-lg px-8 py-6 rounded-full"
+            onClick={() => {
+              window.open('mailto:support@conversaflow.ai?subject=ConversaFlow.AI Support', '_blank');
+            }}
+          >
+            <MessageCircle className="w-6 h-6 mr-2" />
+            Talk to Us
+          </Button>
+          <p className="text-sm text-muted-foreground mt-3">
+            Have questions or feedback? We'd love to hear from you!
+          </p>
         </div>
       </div>
     </div>
