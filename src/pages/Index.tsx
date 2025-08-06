@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Phone, Globe, Mic, MessageSquare } from "lucide-react";
-import { CallInterface } from "@/components/CallInterface";
+import { RealTimeTranslator } from "@/components/RealTimeTranslator";
 import { EarlyAccessSignup } from "@/components/EarlyAccessSignup";
 
 const Index = () => {
@@ -18,7 +18,7 @@ const Index = () => {
   };
 
   if (isInCall) {
-    return <CallInterface onEndCall={endCall} />;
+    return <RealTimeTranslator onEndCall={endCall} />;
   }
 
   return (
