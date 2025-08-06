@@ -120,6 +120,18 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
 
       setTranslations(prev => [...prev, originalTranslation]);
 
+      // Play original speech audio immediately
+      if (audioEnabled && isSpeakerOn && !isMuted) {
+        try {
+          setSpeakingQueue(prev => [...prev, `${translationId}-original`]);
+          await speakInLanguage(message.originalText, message.sourceLanguage);
+          setSpeakingQueue(prev => prev.filter(id => id !== `${translationId}-original`));
+        } catch (error) {
+          console.error("Original audio playback failed:", error);
+          setSpeakingQueue(prev => prev.filter(id => id !== `${translationId}-original`));
+        }
+      }
+
       // Step 2: After 1.5 seconds, show "Translating..." and then the translation
       setTimeout(() => {
         setTranslations(prev => prev.map(t => 
@@ -132,19 +144,19 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
         if (audioEnabled && isSpeakerOn && !isMuted) {
           setTimeout(async () => {
             try {
-              setSpeakingQueue(prev => [...prev, translationId]);
+              setSpeakingQueue(prev => [...prev, `${translationId}-translation`]);
               await speakInLanguage(message.translatedText, message.targetLanguage);
-              setSpeakingQueue(prev => prev.filter(id => id !== translationId));
+              setSpeakingQueue(prev => prev.filter(id => id !== `${translationId}-translation`));
             } catch (error) {
-              console.error("Audio playback failed:", error);
-              setSpeakingQueue(prev => prev.filter(id => id !== translationId));
+              console.error("Translation audio playback failed:", error);
+              setSpeakingQueue(prev => prev.filter(id => id !== `${translationId}-translation`));
               toast({
                 title: "Audio Error",
-                description: "Failed to play audio. Check your connection.",
+                description: "Failed to play translation audio.",
                 variant: "destructive",
               });
             }
-          }, 500); // Small delay before audio
+          }, 800); // Small delay before translation audio
         }
       }, 1500); // Translation appears after 1.5 seconds
       
@@ -262,7 +274,8 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
                   translation.speaker === "caller" 
                     ? "bg-primary/10 ml-8" 
                     : "bg-accent/10 mr-8",
-                  speakingQueue.includes(translation.id) && "ring-2 ring-primary/50 bg-primary/20"
+                  (speakingQueue.includes(`${translation.id}-original`) || 
+                   speakingQueue.includes(`${translation.id}-translation`)) && "ring-2 ring-primary/50 bg-primary/20"
                 )}
               >
                 <div className="flex items-center justify-between">
@@ -270,9 +283,10 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
                     <Badge variant={translation.speaker === "caller" ? "default" : "secondary"}>
                       {translation.speaker === "caller" ? "You" : "Contact"}
                     </Badge>
-                    {speakingQueue.includes(translation.id) && (
+                    {(speakingQueue.includes(`${translation.id}-original`) || 
+                      speakingQueue.includes(`${translation.id}-translation`)) && (
                       <Badge variant="outline" className="animate-pulse">
-                        🔊 Speaking
+                        {speakingQueue.includes(`${translation.id}-original`) ? "🎤 Speaking Original" : "🔊 Speaking Translation"}
                       </Badge>
                     )}
                   </div>
@@ -284,7 +298,12 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
                 <div className="space-y-2">
                   {/* Original Speech */}
                   {translation.showingOriginal && (
-                    <div className="p-3 bg-muted/30 rounded-md">
+                    <div className={cn(
+                      "p-3 rounded-md transition-all duration-300",
+                      speakingQueue.includes(`${translation.id}-original`) 
+                        ? "bg-primary/20 border-2 border-primary/50" 
+                        : "bg-muted/30"
+                    )}>
                       <div className="flex items-center space-x-2 mb-1">
                         <span className="text-xs font-medium text-muted-foreground">
                           {translation.speaker === "caller" ? "You said" : "Contact said"}:
@@ -292,6 +311,11 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
                         <Badge variant="outline" className="text-xs">
                           {getLanguageFlag(translation.sourceLanguage)} {getLanguageName(translation.sourceLanguage)}
                         </Badge>
+                        {speakingQueue.includes(`${translation.id}-original`) && (
+                          <Badge variant="secondary" className="text-xs animate-pulse">
+                            🎤 Playing
+                          </Badge>
+                        )}
                       </div>
                       <p className="font-medium">
                         "{translation.originalText}"
@@ -301,7 +325,12 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
 
                   {/* Translation */}
                   {translation.showingTranslation ? (
-                    <div className="p-3 bg-success/10 rounded-md border border-success/20">
+                    <div className={cn(
+                      "p-3 rounded-md border transition-all duration-300",
+                      speakingQueue.includes(`${translation.id}-translation`)
+                        ? "bg-success/20 border-success/60 border-2" 
+                        : "bg-success/10 border-success/20"
+                    )}>
                       <div className="flex items-center space-x-2 mb-1">
                         <span className="text-xs font-medium text-success">
                           Translation:
@@ -309,6 +338,11 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
                         <Badge variant="secondary" className="text-xs">
                           {getLanguageFlag(translation.targetLanguage)} {getLanguageName(translation.targetLanguage)}
                         </Badge>
+                        {speakingQueue.includes(`${translation.id}-translation`) && (
+                          <Badge variant="default" className="text-xs animate-pulse">
+                            🔊 Playing
+                          </Badge>
+                        )}
                       </div>
                       <p className="font-medium text-success-foreground">
                         {translation.translatedText}
