@@ -42,8 +42,8 @@ export function EarlyAccessSignup() {
       if (error) {
         if (error.code === '23505') { // Unique constraint violation
           toast({
-            title: "Already Registered",
-            description: "This email is already on our early access list!",
+            title: "Already Subscribed",
+            description: "This email is already receiving updates!",
             variant: "default",
           });
         } else {
@@ -52,8 +52,8 @@ export function EarlyAccessSignup() {
       } else {
         setIsSubmitted(true);
         toast({
-          title: "Welcome to ConversaFlow.AI!",
-          description: "You'll be among the first to know when we launch.",
+          title: "Thanks for Subscribing!",
+          description: "You'll receive updates about new features and improvements.",
         });
       }
     } catch (error) {
@@ -73,9 +73,9 @@ export function EarlyAccessSignup() {
       <Card className="p-6 bg-gradient-to-r from-success/10 to-primary/10 border-success/20">
         <div className="text-center space-y-3">
           <CheckCircle className="w-12 h-12 mx-auto text-success" />
-          <h3 className="text-lg font-semibold text-success">You're In!</h3>
+          <h3 className="text-lg font-semibold text-success">You're Subscribed!</h3>
           <p className="text-sm text-muted-foreground">
-            Thanks for joining our early access list. We'll notify you as soon as ConversaFlow.AI is ready!
+            Thanks! You'll receive updates about new features and improvements.
           </p>
         </div>
       </Card>
@@ -86,9 +86,9 @@ export function EarlyAccessSignup() {
     <Card className="p-6 bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
       <div className="text-center space-y-4">
         <div className="space-y-2">
-          <h3 className="text-xl font-semibold">Get Early Access</h3>
+          <h3 className="text-xl font-semibold">Get Updates</h3>
           <p className="text-sm text-muted-foreground">
-            Be the first to experience real-time call translation when we launch.
+            Stay updated on new features, language additions, and improvements to ConversaFlow.AI.
           </p>
         </div>
         
@@ -97,7 +97,7 @@ export function EarlyAccessSignup() {
             <div className="flex-1">
               <Input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Enter your email for updates"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
@@ -119,7 +119,7 @@ export function EarlyAccessSignup() {
           </div>
           
           <p className="text-xs text-muted-foreground">
-            No spam, just updates on our launch progress.
+            No spam, just updates on new features and improvements.
           </p>
         </form>
       </div>

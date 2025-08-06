@@ -153,6 +153,45 @@ const Index = () => {
               Try Phone Translation
             </Button>
             
+            {/* Download Mobile App Section */}
+            <div className="mt-8 p-6 bg-gradient-to-r from-accent/10 to-primary/10 rounded-2xl border border-accent/20">
+              <div className="text-center space-y-4">
+                <h3 className="text-xl font-semibold">📱 Get the Mobile App</h3>
+                <p className="text-muted-foreground">
+                  For the best phone call translation experience, download our mobile app with full call integration.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    onClick={() => window.open('https://github.com/lovable-dev', '_blank')}
+                    className="px-6 py-3"
+                  >
+                    📱 iOS App
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    onClick={() => window.open('https://github.com/lovable-dev', '_blank')}
+                    className="px-6 py-3"
+                  >
+                    🤖 Android App
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    onClick={() => window.open('https://docs.lovable.dev/integrations/capacitor', '_blank')}
+                    className="px-6 py-3"
+                  >
+                    📋 Build Instructions
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Export this project to GitHub and follow our Capacitor guide to build your own app
+                </p>
+              </div>
+            </div>
+            
             <div className="max-w-md mx-auto">
               <EarlyAccessSignup />
             </div>
