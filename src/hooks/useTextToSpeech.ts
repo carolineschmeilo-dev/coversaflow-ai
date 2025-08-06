@@ -82,11 +82,14 @@ export const useTextToSpeech = () => {
   const speak = useCallback(async ({ text, language = 'en' }: TextToSpeechOptions) => {
     try {
       console.log("Speaking text:", text, "in language:", language);
+      
+      // Stop any ongoing speech
+      speechSynthesis.cancel();
       setIsPlaying(true);
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.volume = volume;
-      utterance.rate = 0.9;
+      utterance.rate = 1.2; // Faster speech rate
       utterance.pitch = 1.0;
 
       // Set appropriate voice for the language
@@ -123,6 +126,11 @@ export const useTextToSpeech = () => {
     return speak({ text, language });
   }, [speak]);
 
+  const stopSpeaking = useCallback(() => {
+    speechSynthesis.cancel();
+    setIsPlaying(false);
+  }, []);
+
   const setAudioVolume = useCallback((newVolume: number) => {
     setVolume(Math.max(0, Math.min(1, newVolume)));
   }, []);
@@ -130,6 +138,7 @@ export const useTextToSpeech = () => {
   return {
     speak,
     speakInLanguage,
+    stopSpeaking,
     isPlaying,
     volume,
     setVolume: setAudioVolume,

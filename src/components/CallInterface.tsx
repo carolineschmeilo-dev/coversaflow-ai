@@ -80,8 +80,9 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
   const [callDuration, setCallDuration] = useState(0);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [audioEnabled, setAudioEnabled] = useState(true);
+  const [speakingQueue, setSpeakingQueue] = useState<string[]>([]);
   
-  const { speakInLanguage, isPlaying, volume, setVolume } = useTextToSpeech();
+  const { speakInLanguage, stopSpeaking, isPlaying, volume, setVolume } = useTextToSpeech();
 
   // Simulate call duration
   useEffect(() => {
@@ -116,10 +117,17 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
       // Play audio for translated text if audio is enabled and speaker is on
       if (audioEnabled && isSpeakerOn && !isMuted) {
         try {
+          // Add to speaking queue to show who's talking
+          setSpeakingQueue(prev => [...prev, newTranslation.id]);
+          
           // Speak the translated text in the target language with native pronunciation
           await speakInLanguage(message.translatedText, message.targetLanguage);
+          
+          // Remove from speaking queue when done
+          setSpeakingQueue(prev => prev.filter(id => id !== newTranslation.id));
         } catch (error) {
           console.error("Audio playback failed:", error);
+          setSpeakingQueue(prev => prev.filter(id => id !== newTranslation.id));
           toast({
             title: "Audio Error",
             description: "Failed to play audio. Check your connection.",
@@ -127,7 +135,7 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
           });
         }
       }
-    }, 3000 + currentMessageIndex * 4000);
+    }, 1500 + currentMessageIndex * 2500); // Faster intervals
 
     return () => clearTimeout(timeout);
   }, [isCallActive, currentMessageIndex, audioEnabled, isSpeakerOn, isMuted, speakInLanguage]);
@@ -236,16 +244,24 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
               <div 
                 key={translation.id} 
                 className={cn(
-                  "animate-fade-in p-4 rounded-lg space-y-2",
+                  "animate-fade-in p-4 rounded-lg space-y-2 relative",
                   translation.speaker === "caller" 
                     ? "bg-primary/10 ml-8" 
-                    : "bg-accent/10 mr-8"
+                    : "bg-accent/10 mr-8",
+                  speakingQueue.includes(translation.id) && "ring-2 ring-primary/50 bg-primary/20"
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <Badge variant={translation.speaker === "caller" ? "default" : "secondary"}>
-                    {translation.speaker === "caller" ? "You" : "Contact"}
-                  </Badge>
+                  <div className="flex items-center space-x-2">
+                    <Badge variant={translation.speaker === "caller" ? "default" : "secondary"}>
+                      {translation.speaker === "caller" ? "You" : "Contact"}
+                    </Badge>
+                    {speakingQueue.includes(translation.id) && (
+                      <Badge variant="outline" className="animate-pulse">
+                        🔊 Speaking
+                      </Badge>
+                    )}
+                  </div>
                   <span className="text-xs text-muted-foreground">
                     {translation.timestamp.toLocaleTimeString()}
                   </span>
@@ -280,7 +296,12 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
               <span className="text-sm font-medium">Volume: {Math.round(volume * 100)}%</span>
               {isPlaying && (
                 <Badge variant="secondary" className="animate-pulse">
-                  Playing
+                  🎵 Playing Audio
+                </Badge>
+              )}
+              {speakingQueue.length > 0 && (
+                <Badge variant="outline">
+                  {speakingQueue.length} in queue
                 </Badge>
               )}
             </div>
@@ -292,6 +313,16 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
               step={0.1}
               className="w-full max-w-xs mx-auto"
             />
+            <div className="flex justify-center space-x-2 mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={stopSpeaking}
+                disabled={!isPlaying}
+              >
+                ⏹️ Stop Audio
+              </Button>
+            </div>
           </div>
         </Card>
 
@@ -340,6 +371,7 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
               Audio: {audioEnabled ? "Enabled" : "Disabled"} • 
               Speaker: {isSpeakerOn ? "On" : "Off"} • 
               Mic: {isMuted ? "Muted" : "Active"}
+              {speakingQueue.length > 0 && ` • ${speakingQueue.length} speaking`}
             </p>
           </div>
         </Card>
