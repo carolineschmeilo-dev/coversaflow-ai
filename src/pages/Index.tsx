@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Phone, Globe, Mic, MessageSquare } from "lucide-react";
+import { Phone, Globe, Mic, MessageSquare, MessageCircle } from "lucide-react";
 import { PhoneCallTranslator } from "@/components/PhoneCallTranslator";
+import conversaflowLogo from "@/assets/conversaflow-logo.png";
 import { EarlyAccessSignup } from "@/components/EarlyAccessSignup";
 
 const Index = () => {
@@ -26,10 +27,17 @@ const Index = () => {
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center space-y-8 max-w-3xl mx-auto">
-          <div className="space-y-4">
-            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent">
-              ConversaFlow.AI
-            </h1>
+          <div className="space-y-6">
+            <div className="flex items-center justify-center mb-6">
+              <img 
+                src={conversaflowLogo} 
+                alt="ConversaFlow.AI Logo" 
+                className="w-20 h-20 mr-4"
+              />
+              <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent">
+                ConversaFlow.AI
+              </h1>
+            </div>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Break down language barriers with real-time translation for phone conversations. 
               Connect with anyone, anywhere, in their native language.
@@ -50,13 +58,11 @@ const Index = () => {
               size="lg" 
               className="text-lg px-8 py-6 rounded-full"
               onClick={() => {
-                document.getElementById('features')?.scrollIntoView({ 
-                  behavior: 'smooth' 
-                });
+                window.open('mailto:support@conversaflow.ai?subject=ConversaFlow.AI Support', '_blank');
               }}
             >
-              <Globe className="w-6 h-6 mr-2" />
-              Learn More
+              <MessageCircle className="w-6 h-6 mr-2" />
+              Talk to Us
             </Button>
           </div>
         </div>
