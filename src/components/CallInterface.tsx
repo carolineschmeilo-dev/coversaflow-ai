@@ -40,31 +40,31 @@ const languages = [
 const simulatedConversation = [
   { 
     speaker: "caller" as const, 
-    originalText: "Hello, how are you today?", 
-    translatedText: "Hola, ¿cómo estás hoy?",
-    sourceLanguage: "en",
-    targetLanguage: "es"
+    originalText: "Hola, ¿cómo estás hoy?", // Caller speaks Spanish
+    translatedText: "Hello, how are you today?", // Translated TO English for receiver
+    sourceLanguage: "es",
+    targetLanguage: "en"
   },
   { 
     speaker: "receiver" as const, 
-    originalText: "Muy bien, gracias. ¿Y tú?", 
-    translatedText: "Very well, thank you. And you?",
-    sourceLanguage: "es",
-    targetLanguage: "en"
+    originalText: "Very well, thank you. And you?", // Receiver speaks English
+    translatedText: "Muy bien, gracias. ¿Y tú?", // Translated TO Spanish for caller
+    sourceLanguage: "en",
+    targetLanguage: "es"
   },
   { 
     speaker: "caller" as const, 
-    originalText: "I'm doing great. I wanted to discuss the project with you.", 
-    translatedText: "Me va muy bien. Quería discutir el proyecto contigo.",
-    sourceLanguage: "en",
-    targetLanguage: "es"
+    originalText: "Quería discutir el proyecto contigo.", // Caller speaks Spanish
+    translatedText: "I wanted to discuss the project with you.", // Translated TO English
+    sourceLanguage: "es",
+    targetLanguage: "en"
   },
   { 
     speaker: "receiver" as const, 
-    originalText: "Perfecto, estoy listo para hablar sobre eso.", 
-    translatedText: "Perfect, I'm ready to talk about that.",
-    sourceLanguage: "es",
-    targetLanguage: "en"
+    originalText: "Perfect, I'm ready to talk about that.", // Receiver speaks English
+    translatedText: "Perfecto, estoy listo para hablar sobre eso.", // Translated TO Spanish
+    sourceLanguage: "en",
+    targetLanguage: "es"
   }
 ];
 
@@ -75,8 +75,8 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
   const [translations, setTranslations] = useState<Translation[]>([]);
-  const [callerLanguage, setCallerLanguage] = useState("en");
-  const [receiverLanguage, setReceiverLanguage] = useState("es");
+  const [callerLanguage, setCallerLanguage] = useState("es"); // Caller speaks Spanish
+  const [receiverLanguage, setReceiverLanguage] = useState("en"); // Receiver speaks English
   const [callDuration, setCallDuration] = useState(0);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [audioEnabled, setAudioEnabled] = useState(true);
@@ -269,7 +269,7 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
                 
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">
-                    {getLanguageFlag(translation.sourceLanguage)} {translation.originalText}
+                    {getLanguageFlag(translation.sourceLanguage)} "{translation.originalText}"
                   </p>
                   <p className="font-medium">
                     {getLanguageFlag(translation.targetLanguage)} {translation.translatedText}
