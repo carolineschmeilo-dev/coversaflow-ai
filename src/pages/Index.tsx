@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Phone, Globe, Mic, MessageSquare, MessageCircle } from "lucide-react";
 import { PhoneCallTranslator } from "@/components/PhoneCallTranslator";
-import conversaflowLogo from "@/assets/conversaflow-logo.png";
+import conversaflowLogo from "@/assets/conversaflow-logo-new.png";
 import { EarlyAccessSignup } from "@/components/EarlyAccessSignup";
 
 const Index = () => {
