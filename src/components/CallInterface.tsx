@@ -81,7 +81,7 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [audioEnabled, setAudioEnabled] = useState(true);
   
-  const { speakAsCallerVoice, speakAsReceiverVoice, isPlaying, volume, setVolume } = useTextToSpeech();
+  const { speakInLanguage, isPlaying, volume, setVolume } = useTextToSpeech();
 
   // Simulate call duration
   useEffect(() => {
@@ -116,11 +116,8 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
       // Play audio for translated text if audio is enabled and speaker is on
       if (audioEnabled && isSpeakerOn && !isMuted) {
         try {
-          if (message.speaker === "caller") {
-            await speakAsCallerVoice(message.translatedText);
-          } else {
-            await speakAsReceiverVoice(message.translatedText);
-          }
+          // Speak the translated text in the target language with native pronunciation
+          await speakInLanguage(message.translatedText, message.targetLanguage);
         } catch (error) {
           console.error("Audio playback failed:", error);
           toast({
@@ -133,7 +130,7 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
     }, 3000 + currentMessageIndex * 4000);
 
     return () => clearTimeout(timeout);
-  }, [isCallActive, currentMessageIndex, audioEnabled, isSpeakerOn, isMuted, speakAsCallerVoice, speakAsReceiverVoice]);
+  }, [isCallActive, currentMessageIndex, audioEnabled, isSpeakerOn, isMuted, speakInLanguage]);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
