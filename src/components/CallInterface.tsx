@@ -32,6 +32,7 @@ const languages = [
   { code: "de", name: "German", flag: "🇩🇪" },
   { code: "it", name: "Italian", flag: "🇮🇹" },
   { code: "pt", name: "Portuguese", flag: "🇵🇹" },
+  { code: "pt-BR", name: "Brazilian Portuguese", flag: "🇧🇷" },
   { code: "ru", name: "Russian", flag: "🇷🇺" },
   { code: "zh", name: "Chinese", flag: "🇨🇳" },
   { code: "ja", name: "Japanese", flag: "🇯🇵" },

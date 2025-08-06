@@ -23,6 +23,7 @@ const languageMap: Record<string, string> = {
   'de': 'de',
   'it': 'it',
   'pt': 'pt',
+  'pt-BR': 'pt',
   'ru': 'ru',
   'zh': 'zh',
   'ja': 'ja',

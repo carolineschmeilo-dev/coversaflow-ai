@@ -33,6 +33,7 @@ const languages = [
   { code: "de", name: "German", flag: "🇩🇪", speechLang: "de-DE" },
   { code: "it", name: "Italian", flag: "🇮🇹", speechLang: "it-IT" },
   { code: "pt", name: "Portuguese", flag: "🇵🇹", speechLang: "pt-PT" },
+  { code: "pt-BR", name: "Brazilian Portuguese", flag: "🇧🇷", speechLang: "pt-BR" },
   { code: "ru", name: "Russian", flag: "🇷🇺", speechLang: "ru-RU" },
   { code: "zh", name: "Chinese", flag: "🇨🇳", speechLang: "zh-CN" },
   { code: "ja", name: "Japanese", flag: "🇯🇵", speechLang: "ja-JP" },
