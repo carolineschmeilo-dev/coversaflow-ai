@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Phone, Globe, Mic, MessageSquare } from "lucide-react";
-import { RealTimeTranslator } from "@/components/RealTimeTranslator";
+import { PhoneCallTranslator } from "@/components/PhoneCallTranslator";
 import { EarlyAccessSignup } from "@/components/EarlyAccessSignup";
 
 const Index = () => {
@@ -18,7 +18,7 @@ const Index = () => {
   };
 
   if (isInCall) {
-    return <RealTimeTranslator onEndCall={endCall} />;
+    return <PhoneCallTranslator onEndCall={endCall} />;
   }
 
   return (
@@ -43,7 +43,7 @@ const Index = () => {
               className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <Phone className="w-6 h-6 mr-2" />
-              Start Demo Call
+              Start Phone Translation
             </Button>
             <Button 
               variant="outline" 
@@ -150,7 +150,7 @@ const Index = () => {
               className="bg-gradient-to-r from-primary to-accent hover:from-primary-glow hover:to-primary text-lg px-12 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <Phone className="w-6 h-6 mr-2" />
-              Try Demo Now
+              Try Phone Translation
             </Button>
             
             <div className="max-w-md mx-auto">
