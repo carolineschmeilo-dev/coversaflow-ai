@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 
 interface TextToSpeechOptions {
   text: string;
@@ -19,6 +19,26 @@ export const useTextToSpeech = () => {
   const speak = useCallback(async ({ text, voiceId, modelId }: TextToSpeechOptions) => {
     try {
       setIsPlaying(true);
+
+      // Check if Supabase is configured
+      if (!isSupabaseConfigured || !supabase) {
+        // Fallback: Use browser's built-in speech synthesis
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.volume = volume;
+        utterance.rate = 0.9;
+        
+        return new Promise<void>((resolve) => {
+          utterance.onend = () => {
+            setIsPlaying(false);
+            resolve();
+          };
+          utterance.onerror = () => {
+            setIsPlaying(false);
+            resolve();
+          };
+          speechSynthesis.speak(utterance);
+        });
+      }
 
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
         body: {
