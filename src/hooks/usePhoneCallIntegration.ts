@@ -60,11 +60,19 @@ export const usePhoneCallIntegration = (): UsePhoneCallIntegrationReturn => {
 
   const checkSupport = useCallback(async () => {
     try {
-      const info = await Device.getInfo();
       const hasMediaDevices = 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices;
       const hasWebAudio = 'AudioContext' in window || 'webkitAudioContext' in window;
       
-      setIsSupported(hasMediaDevices && hasWebAudio && (info.platform === 'ios' || info.platform === 'android'));
+      // Support both mobile devices and modern web browsers
+      try {
+        const info = await Device.getInfo();
+        // Native mobile apps (iOS/Android) or web browsers with required APIs
+        setIsSupported(hasMediaDevices && hasWebAudio && 
+          (info.platform === 'ios' || info.platform === 'android' || info.platform === 'web'));
+      } catch {
+        // Fallback for web browsers without Capacitor
+        setIsSupported(hasMediaDevices && hasWebAudio);
+      }
     } catch (err) {
       setIsSupported(false);
     }
