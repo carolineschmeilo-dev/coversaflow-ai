@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, Globe } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, Globe, VolumeIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTextToSpeech } from "@/hooks/useTextToSpeech";
+import { toast } from "@/hooks/use-toast";
 
 interface Translation {
   id: string;
@@ -68,12 +71,15 @@ const simulatedConversation = [
 export function CallInterface({ onEndCall }: CallInterfaceProps) {
   const [isCallActive, setIsCallActive] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
-  const [isSpeakerOn, setIsSpeakerOn] = useState(false);
+  const [isSpeakerOn, setIsSpeakerOn] = useState(true);
   const [translations, setTranslations] = useState<Translation[]>([]);
   const [callerLanguage, setCallerLanguage] = useState("en");
   const [receiverLanguage, setReceiverLanguage] = useState("es");
   const [callDuration, setCallDuration] = useState(0);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  const [audioEnabled, setAudioEnabled] = useState(true);
+  
+  const { speakAsCallerVoice, speakAsReceiverVoice, isPlaying, volume, setVolume } = useTextToSpeech();
 
   // Simulate call duration
   useEffect(() => {
@@ -90,7 +96,7 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
   useEffect(() => {
     if (!isCallActive || currentMessageIndex >= simulatedConversation.length) return;
 
-    const timeout = setTimeout(() => {
+    const timeout = setTimeout(async () => {
       const message = simulatedConversation[currentMessageIndex];
       const newTranslation: Translation = {
         id: Date.now().toString(),
@@ -104,10 +110,28 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
 
       setTranslations(prev => [...prev, newTranslation]);
       setCurrentMessageIndex(prev => prev + 1);
+      
+      // Play audio for translated text if audio is enabled and speaker is on
+      if (audioEnabled && isSpeakerOn && !isMuted) {
+        try {
+          if (message.speaker === "caller") {
+            await speakAsCallerVoice(message.translatedText);
+          } else {
+            await speakAsReceiverVoice(message.translatedText);
+          }
+        } catch (error) {
+          console.error("Audio playback failed:", error);
+          toast({
+            title: "Audio Error",
+            description: "Failed to play audio. Check your connection.",
+            variant: "destructive",
+          });
+        }
+      }
     }, 3000 + currentMessageIndex * 4000);
 
     return () => clearTimeout(timeout);
-  }, [isCallActive, currentMessageIndex]);
+  }, [isCallActive, currentMessageIndex, audioEnabled, isSpeakerOn, isMuted, speakAsCallerVoice, speakAsReceiverVoice]);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -249,6 +273,29 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
           </div>
         </Card>
 
+        {/* Audio Controls */}
+        <Card className="p-6">
+          <div className="space-y-4">
+            <div className="flex items-center justify-center space-x-2">
+              <VolumeIcon className="w-4 h-4" />
+              <span className="text-sm font-medium">Volume: {Math.round(volume * 100)}%</span>
+              {isPlaying && (
+                <Badge variant="secondary" className="animate-pulse">
+                  Playing
+                </Badge>
+              )}
+            </div>
+            <Slider
+              value={[volume]}
+              onValueChange={(value) => setVolume(value[0])}
+              max={1}
+              min={0}
+              step={0.1}
+              className="w-full max-w-xs mx-auto"
+            />
+          </div>
+        </Card>
+
         {/* Call Controls */}
         <Card className="p-6">
           <div className="flex items-center justify-center space-x-6">
@@ -278,6 +325,23 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
             >
               {isSpeakerOn ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
             </Button>
+
+            <Button
+              variant={audioEnabled ? "default" : "secondary"}
+              size="lg"
+              onClick={() => setAudioEnabled(!audioEnabled)}
+              className="rounded-full p-4"
+            >
+              🔊
+            </Button>
+          </div>
+          
+          <div className="text-center mt-4 space-y-1">
+            <p className="text-xs text-muted-foreground">
+              Audio: {audioEnabled ? "Enabled" : "Disabled"} • 
+              Speaker: {isSpeakerOn ? "On" : "Off"} • 
+              Mic: {isMuted ? "Muted" : "Active"}
+            </p>
           </div>
         </Card>
 
