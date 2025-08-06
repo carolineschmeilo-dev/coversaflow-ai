@@ -132,7 +132,7 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
         }
       }
 
-      // Step 2: After 1.5 seconds, show "Translating..." and then the translation
+      // Step 2: After 0.8 seconds, show "Translating..." and then the translation
       setTimeout(() => {
         setTranslations(prev => prev.map(t => 
           t.id === translationId 
@@ -156,12 +156,12 @@ export function CallInterface({ onEndCall }: CallInterfaceProps) {
                 variant: "destructive",
               });
             }
-          }, 800); // Small delay before translation audio
+          }, 200); // Very quick delay before translation audio
         }
-      }, 1500); // Translation appears after 1.5 seconds
+      }, 800); // Translation appears after 0.8 seconds
       
       setCurrentMessageIndex(prev => prev + 1);
-    }, 1000 + currentMessageIndex * 3000); // Stagger conversations
+    }, 500 + currentMessageIndex * 1800); // Much faster conversation flow
 
     return () => clearTimeout(timeout);
   }, [isCallActive, currentMessageIndex, audioEnabled, isSpeakerOn, isMuted, speakInLanguage]);

@@ -89,7 +89,7 @@ export const useTextToSpeech = () => {
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.volume = volume;
-      utterance.rate = 1.2; // Faster speech rate
+      utterance.rate = 1.4; // Even faster speech rate
       utterance.pitch = 1.0;
 
       // Set appropriate voice for the language
