@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Phone, Globe, Mic, MessageSquare } from "lucide-react";
 import { CallInterface } from "@/components/CallInterface";
+import { EarlyAccessSignup } from "@/components/EarlyAccessSignup";
 
 const Index = () => {
   console.log("Index component rendering");
@@ -128,19 +129,26 @@ const Index = () => {
 
         {/* CTA Section */}
         <div className="mt-20 text-center bg-gradient-to-r from-primary/10 to-accent/10 rounded-2xl p-12 border border-primary/20">
-          <h2 className="text-3xl font-bold mb-4">Ready to Connect the World?</h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Experience the future of global communication. Start translating conversations 
-            in real-time and break down language barriers today.
-          </p>
-          <Button 
-            size="lg" 
-            onClick={startCall}
-            className="bg-gradient-to-r from-primary to-accent hover:from-primary-glow hover:to-primary text-lg px-12 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            <Phone className="w-6 h-6 mr-2" />
-            Try Demo Now
-          </Button>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div className="space-y-6">
+              <h2 className="text-3xl font-bold">Ready to Connect the World?</h2>
+              <p className="text-lg text-muted-foreground">
+                Experience the future of global communication. Join our early access list and be among the first to break down language barriers.
+              </p>
+              <Button 
+                size="lg" 
+                onClick={startCall}
+                className="bg-gradient-to-r from-primary to-accent hover:from-primary-glow hover:to-primary text-lg px-12 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Phone className="w-6 h-6 mr-2" />
+                Try Demo Now
+              </Button>
+            </div>
+            
+            <div>
+              <EarlyAccessSignup />
+            </div>
+          </div>
         </div>
       </div>
     </div>
