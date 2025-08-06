@@ -27,7 +27,7 @@ const Index = () => {
         <div className="text-center space-y-8 max-w-3xl mx-auto">
           <div className="space-y-4">
             <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent">
-              Universal Call Translator
+              ConversaFlow.AI
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Break down language barriers with real-time translation for phone conversations. 
