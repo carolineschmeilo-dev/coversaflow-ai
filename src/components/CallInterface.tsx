@@ -69,6 +69,8 @@ const simulatedConversation = [
 ];
 
 export function CallInterface({ onEndCall }: CallInterfaceProps) {
+  console.log("CallInterface component rendering");
+  
   const [isCallActive, setIsCallActive] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);

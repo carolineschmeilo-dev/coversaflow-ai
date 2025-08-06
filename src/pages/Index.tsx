@@ -5,6 +5,7 @@ import { Phone, Globe, Mic, MessageSquare } from "lucide-react";
 import { CallInterface } from "@/components/CallInterface";
 
 const Index = () => {
+  console.log("Index component rendering");
   const [isInCall, setIsInCall] = useState(false);
 
   const startCall = () => {

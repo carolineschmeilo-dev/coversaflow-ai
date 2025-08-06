@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 
 interface TextToSpeechOptions {
   text: string;
@@ -7,70 +6,32 @@ interface TextToSpeechOptions {
   modelId?: string;
 }
 
-const VOICE_IDS = {
-  caller: 'TX3LPaxmHKxFdv7VOQHJ', // Liam - male voice for caller
-  receiver: 'EXAVITQu4vr4xnSDxMaL', // Sarah - female voice for receiver
-} as const;
-
 export const useTextToSpeech = () => {
+  console.log("useTextToSpeech hook initializing");
+  
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.7);
 
-  const speak = useCallback(async ({ text, voiceId, modelId }: TextToSpeechOptions) => {
+  const speak = useCallback(async ({ text }: TextToSpeechOptions) => {
     try {
+      console.log("Speaking text:", text);
       setIsPlaying(true);
 
-      // Check if Supabase is configured
-      if (!isSupabaseConfigured || !supabase) {
-        // Fallback: Use browser's built-in speech synthesis
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.volume = volume;
-        utterance.rate = 0.9;
-        
-        return new Promise<void>((resolve) => {
-          utterance.onend = () => {
-            setIsPlaying(false);
-            resolve();
-          };
-          utterance.onerror = () => {
-            setIsPlaying(false);
-            resolve();
-          };
-          speechSynthesis.speak(utterance);
-        });
-      }
-
-      const { data, error } = await supabase.functions.invoke('text-to-speech', {
-        body: {
-          text,
-          voiceId: voiceId || VOICE_IDS.caller,
-          modelId: modelId || 'eleven_turbo_v2_5'
-        }
-      });
-
-      if (error) throw error;
-
-      // Convert the response to audio blob
-      const audioBlob = new Blob([data], { type: 'audio/mpeg' });
-      const audioUrl = URL.createObjectURL(audioBlob);
+      // Use browser's built-in speech synthesis for now
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.volume = volume;
+      utterance.rate = 0.9;
       
-      const audio = new Audio(audioUrl);
-      audio.volume = volume;
-      
-      return new Promise<void>((resolve, reject) => {
-        audio.onended = () => {
-          URL.revokeObjectURL(audioUrl);
+      return new Promise<void>((resolve) => {
+        utterance.onend = () => {
           setIsPlaying(false);
           resolve();
         };
-        
-        audio.onerror = () => {
-          URL.revokeObjectURL(audioUrl);
+        utterance.onerror = () => {
           setIsPlaying(false);
-          reject(new Error('Audio playback failed'));
+          resolve();
         };
-        
-        audio.play().catch(reject);
+        speechSynthesis.speak(utterance);
       });
     } catch (error) {
       setIsPlaying(false);
@@ -80,11 +41,11 @@ export const useTextToSpeech = () => {
   }, [volume]);
 
   const speakAsCallerVoice = useCallback((text: string) => {
-    return speak({ text, voiceId: VOICE_IDS.caller });
+    return speak({ text });
   }, [speak]);
 
   const speakAsReceiverVoice = useCallback((text: string) => {
-    return speak({ text, voiceId: VOICE_IDS.receiver });
+    return speak({ text });
   }, [speak]);
 
   const setAudioVolume = useCallback((newVolume: number) => {
