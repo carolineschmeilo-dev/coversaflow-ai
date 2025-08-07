@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePhoneCallIntegration } from "@/hooks/usePhoneCallIntegration";
+import { useElevenLabsTTS } from "@/hooks/useElevenLabsTTS";
 import { toast } from "@/hooks/use-toast";
 
 interface Translation {
@@ -52,6 +53,7 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
 
   const speechRecognition = useSpeechRecognition();
   const { translate, isTranslating } = useTranslation();
+  const elevenLabsTTS = useElevenLabsTTS();
   const phoneIntegration = usePhoneCallIntegration();
 
   const requestPermissions = useCallback(async () => {
@@ -80,22 +82,16 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
     if (!text || !phoneIntegration.callState.isActive) return;
 
     try {
-      // Use Text-to-Speech during active call
-      if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(text);
-        const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith(language));
-        if (voice) utterance.voice = voice;
-        utterance.volume = volume;
-        utterance.rate = 0.9; // Slightly slower for call clarity
-        
-        // Stop current speech before starting new one
-        speechSynthesis.cancel();
-        speechSynthesis.speak(utterance);
-      }
+      console.log('Speaking translation with ElevenLabs:', { text, language });
+      await elevenLabsTTS.speak({ 
+        text, 
+        language,
+        // You can specify a specific voice ID here if needed
+      });
     } catch (error) {
-      console.error('TTS during call error:', error);
+      console.error('ElevenLabs TTS during call error:', error);
     }
-  }, [volume, phoneIntegration.callState.isActive]);
+  }, [elevenLabsTTS, phoneIntegration.callState.isActive]);
 
   const handleNewSpeech = useCallback(async (
     text: string, 
@@ -201,13 +197,13 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
   const stopPhoneCallTranslation = useCallback(() => {
     phoneIntegration.stopCallRecording();
     speechRecognition.stopListening();
-    speechSynthesis.cancel();
+    elevenLabsTTS.stopSpeaking();
     
     toast({
       title: "Translation Stopped",
       description: "Phone call translation has been ended.",
     });
-  }, [phoneIntegration, speechRecognition]);
+  }, [phoneIntegration, speechRecognition, elevenLabsTTS]);
 
   const handleEndCall = () => {
     stopPhoneCallTranslation();
