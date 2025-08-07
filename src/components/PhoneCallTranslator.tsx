@@ -103,6 +103,7 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
     toLang: string, 
     speaker: "caller" | "receiver"
   ) => {
+    console.log('handleNewSpeech called with:', { text, fromLang, toLang, speaker });
     if (!text.trim()) return;
 
     const translationId = Date.now().toString();
@@ -149,7 +150,16 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
 
   // Listen for speech recognition results and trigger translation
   useEffect(() => {
+    console.log('Speech recognition state:', {
+      finalTranscript: speechRecognition.finalTranscript,
+      isListening: speechRecognition.isListening,
+      isCallActive: phoneIntegration.callState.isActive,
+      transcript: speechRecognition.transcript,
+      interimTranscript: speechRecognition.interimTranscript
+    });
+    
     if (speechRecognition.finalTranscript && phoneIntegration.callState.isActive) {
+      console.log('Triggering translation for:', speechRecognition.finalTranscript);
       handleNewSpeech(
         speechRecognition.finalTranscript,
         callerLanguage,
@@ -172,6 +182,7 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
       
       // Start speech recognition for caller's side
       const lang = languages.find(l => l.code === callerLanguage)?.speechLang || "en-US";
+      console.log('Starting speech recognition with language:', lang);
       speechRecognition.startListening(lang, true);
 
       toast({
