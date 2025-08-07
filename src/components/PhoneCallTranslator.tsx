@@ -11,7 +11,7 @@ import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePhoneCallIntegration } from "@/hooks/usePhoneCallIntegration";
 import { useElevenLabsTTS } from "@/hooks/useElevenLabsTTS";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface Translation {
   id: string;
@@ -55,6 +55,7 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
   const { translate, isTranslating } = useTranslation();
   const elevenLabsTTS = useElevenLabsTTS();
   const phoneIntegration = usePhoneCallIntegration();
+  const { toast } = useToast();
 
   const requestPermissions = useCallback(async () => {
     try {
