@@ -84,30 +84,40 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
       return;
     }
 
+    console.log('Attempting to speak translation:', { text, language });
+
+    // For now, let's use browser speech synthesis directly since ElevenLabs might not be configured
     try {
-      console.log('Speaking translation with ElevenLabs:', { text, language });
-      await elevenLabsTTS.speak({ 
-        text, 
-        language,
-      });
-      console.log('ElevenLabs TTS completed successfully');
-    } catch (error) {
-      console.error('ElevenLabs TTS failed, falling back to browser speech:', error);
-      
-      // Fallback to browser speech synthesis
       if ('speechSynthesis' in window) {
+        console.log('Using browser speech synthesis');
+        speechSynthesis.cancel(); // Stop any current speech
+        
         const utterance = new SpeechSynthesisUtterance(text);
-        const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith(language));
-        if (voice) utterance.voice = voice;
+        const voices = speechSynthesis.getVoices();
+        const voice = voices.find(v => v.lang.startsWith(language)) || voices.find(v => v.lang.startsWith('en'));
+        
+        if (voice) {
+          utterance.voice = voice;
+          console.log('Selected voice:', voice.name, voice.lang);
+        }
+        
         utterance.volume = volume;
         utterance.rate = 0.9;
+        utterance.pitch = 1.0;
         
-        speechSynthesis.cancel();
+        utterance.onstart = () => console.log('Speech started');
+        utterance.onend = () => console.log('Speech ended');
+        utterance.onerror = (e) => console.error('Speech error:', e);
+        
         speechSynthesis.speak(utterance);
-        console.log('Browser speech synthesis started as fallback');
+        console.log('Browser speech synthesis initiated');
+      } else {
+        console.error('Speech synthesis not available');
       }
+    } catch (error) {
+      console.error('Speech synthesis error:', error);
     }
-  }, [elevenLabsTTS, phoneIntegration.callState.isActive, volume]);
+  }, [phoneIntegration.callState.isActive, volume]);
 
   const handleNewSpeech = useCallback(async (
     text: string, 
@@ -218,13 +228,13 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
   const stopPhoneCallTranslation = useCallback(() => {
     phoneIntegration.stopCallRecording();
     speechRecognition.stopListening();
-    elevenLabsTTS.stopSpeaking();
+    speechSynthesis.cancel(); // Use browser speech synthesis cancel
     
     toast({
       title: "Translation Stopped",
       description: "Phone call translation has been ended.",
     });
-  }, [phoneIntegration, speechRecognition, elevenLabsTTS]);
+  }, [phoneIntegration, speechRecognition]);
 
   const handleEndCall = () => {
     stopPhoneCallTranslation();
