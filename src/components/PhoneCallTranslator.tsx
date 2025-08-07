@@ -246,22 +246,45 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
   const testElevenLabs = async () => {
     try {
       toast({
-        title: "Testing ElevenLabs",
+        title: "Testing Audio",
         description: "Attempting to generate test audio...",
       });
       
-      await elevenLabsTTS.speak({ 
-        text: "Hello, this is a test of ElevenLabs text to speech.", 
-        language: "en" 
-      });
-      
-      toast({
-        title: "ElevenLabs Test Success",
-        description: "Audio should be playing now.",
-      });
+      // First try browser speech synthesis as a simple test
+      if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance("Hello, this is a test of audio playback.");
+        utterance.volume = volume;
+        utterance.rate = 0.9;
+        
+        utterance.onstart = () => console.log('Test speech started');
+        utterance.onend = () => {
+          console.log('Test speech ended');
+          toast({
+            title: "Audio Test Success",
+            description: "Browser speech synthesis is working!",
+          });
+        };
+        utterance.onerror = (e) => {
+          console.error('Test speech error:', e);
+          toast({
+            title: "Audio Test Failed",
+            description: "Browser speech synthesis failed",
+            variant: "destructive",
+          });
+        };
+        
+        speechSynthesis.speak(utterance);
+      } else {
+        toast({
+          title: "Audio Not Available",
+          description: "Speech synthesis not supported in this browser",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       toast({
-        title: "ElevenLabs Test Failed",
+        title: "Audio Test Failed",
         description: `Error: ${error}`,
         variant: "destructive",
       });
