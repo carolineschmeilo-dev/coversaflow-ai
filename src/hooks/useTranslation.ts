@@ -90,24 +90,39 @@ export const useTranslation = (): UseTranslationReturn => {
         confidence: 0.9
       };
     } catch (err) {
-      console.warn('Google Translate failed, using simple translation logic:', err);
+      console.warn('Translation service failed, using simple replacement:', err);
       
-      // Very simple word replacement for demo
-      const simpleTranslations: Record<string, Record<string, string>> = {
-        'en': {
-          'es': text.replace(/hello/gi, 'hola').replace(/how are you/gi, 'cómo estás').replace(/thank you/gi, 'gracias'),
-          'pt-BR': text.replace(/hello/gi, 'olá').replace(/how are you/gi, 'como vai').replace(/thank you/gi, 'obrigado'),
-          'fr': text.replace(/hello/gi, 'bonjour').replace(/how are you/gi, 'comment allez-vous').replace(/thank you/gi, 'merci'),
-        },
-        'es': {
-          'en': text.replace(/hola/gi, 'hello').replace(/cómo estás/gi, 'how are you').replace(/gracias/gi, 'thank you'),
-        },
-        'pt-BR': {
-          'en': text.replace(/olá/gi, 'hello').replace(/como vai/gi, 'how are you').replace(/obrigado/gi, 'thank you'),
-        }
-      };
-
-      const translatedText = simpleTranslations[from]?.[to] || `[${to.toUpperCase()}]: ${text}`;
+      // Very simple word-by-word replacement that should always work
+      let translatedText = text;
+      
+      if (from === 'en' && to === 'es') {
+        translatedText = text
+          .replace(/hello/gi, 'hola')
+          .replace(/hi/gi, 'hola')
+          .replace(/how are you/gi, 'cómo estás')
+          .replace(/thank you/gi, 'gracias')
+          .replace(/good morning/gi, 'buenos días')
+          .replace(/good afternoon/gi, 'buenas tardes')
+          .replace(/goodbye/gi, 'adiós');
+      } else if (from === 'en' && to === 'pt-BR') {
+        translatedText = text
+          .replace(/hello/gi, 'olá')
+          .replace(/hi/gi, 'olá')
+          .replace(/how are you/gi, 'como você está')
+          .replace(/thank you/gi, 'obrigado')
+          .replace(/good morning/gi, 'bom dia')
+          .replace(/goodbye/gi, 'tchau');
+      } else if (from === 'es' && to === 'en') {
+        translatedText = text
+          .replace(/hola/gi, 'hello')
+          .replace(/cómo estás/gi, 'how are you')
+          .replace(/gracias/gi, 'thank you')
+          .replace(/buenos días/gi, 'good morning')
+          .replace(/adiós/gi, 'goodbye');
+      } else {
+        // If no specific translation, just add language indicator
+        translatedText = `[${to.toUpperCase()}] ${text}`;
+      }
       
       return {
         translatedText,
