@@ -54,19 +54,6 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
   const { translate, isTranslating } = useTranslation();
   const phoneIntegration = usePhoneCallIntegration();
 
-  // Handle speech recognition results
-  useEffect(() => {
-    if (speechRecognition.finalTranscript) {
-      handleNewSpeech(
-        speechRecognition.finalTranscript, 
-        callerLanguage, 
-        receiverLanguage, 
-        "caller"
-      );
-      speechRecognition.resetTranscript();
-    }
-  }, [speechRecognition.finalTranscript, callerLanguage, receiverLanguage]);
-
   const requestPermissions = useCallback(async () => {
     try {
       const granted = await phoneIntegration.requestPermissions();
@@ -88,6 +75,27 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
       });
     }
   }, [phoneIntegration]);
+
+  const speakTranslationDuringCall = useCallback(async (text: string, language: string) => {
+    if (!text || !phoneIntegration.callState.isActive) return;
+
+    try {
+      // Use Text-to-Speech during active call
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith(language));
+        if (voice) utterance.voice = voice;
+        utterance.volume = volume;
+        utterance.rate = 0.9; // Slightly slower for call clarity
+        
+        // Stop current speech before starting new one
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utterance);
+      }
+    } catch (error) {
+      console.error('TTS during call error:', error);
+    }
+  }, [volume, phoneIntegration.callState.isActive]);
 
   const handleNewSpeech = useCallback(async (
     text: string, 
@@ -137,28 +145,21 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
         variant: "destructive",
       });
     }
-  }, [translate, speechRecognition.confidence]);
+  }, [translate, speechRecognition.confidence, speakTranslationDuringCall]);
 
-  const speakTranslationDuringCall = useCallback(async (text: string, language: string) => {
-    if (!text || !phoneIntegration.callState.isActive) return;
-
-    try {
-      // Use Text-to-Speech during active call
-      if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(text);
-        const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith(language));
-        if (voice) utterance.voice = voice;
-        utterance.volume = volume;
-        utterance.rate = 0.9; // Slightly slower for call clarity
-        
-        // Stop current speech before starting new one
-        speechSynthesis.cancel();
-        speechSynthesis.speak(utterance);
-      }
-    } catch (error) {
-      console.error('TTS during call error:', error);
+  // Listen for speech recognition results and trigger translation
+  useEffect(() => {
+    if (speechRecognition.finalTranscript && phoneIntegration.callState.isActive) {
+      handleNewSpeech(
+        speechRecognition.finalTranscript,
+        callerLanguage,
+        receiverLanguage,
+        "caller"
+      );
+      // Reset the transcript after processing
+      speechRecognition.resetTranscript();
     }
-  }, [volume, phoneIntegration.callState.isActive]);
+  }, [speechRecognition.finalTranscript, phoneIntegration.callState.isActive, callerLanguage, receiverLanguage, handleNewSpeech, speechRecognition.resetTranscript]);
 
   const startPhoneCallTranslation = useCallback(async () => {
     if (!isSetupComplete) {
