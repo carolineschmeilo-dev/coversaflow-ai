@@ -241,6 +241,32 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
     onEndCall?.();
   };
 
+  // Test function to check ElevenLabs connection
+  const testElevenLabs = async () => {
+    try {
+      toast({
+        title: "Testing ElevenLabs",
+        description: "Attempting to generate test audio...",
+      });
+      
+      await elevenLabsTTS.speak({ 
+        text: "Hello, this is a test of ElevenLabs text to speech.", 
+        language: "en" 
+      });
+      
+      toast({
+        title: "ElevenLabs Test Success",
+        description: "Audio should be playing now.",
+      });
+    } catch (error) {
+      toast({
+        title: "ElevenLabs Test Failed",
+        description: `Error: ${error}`,
+        variant: "destructive",
+      });
+    }
+  };
+
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -575,6 +601,16 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
                   Start Translation
                 </>
               )}
+            </Button>
+
+            {/* Test ElevenLabs Button */}
+            <Button
+              variant="secondary"
+              size="lg"
+              onClick={testElevenLabs}
+              className="rounded-full px-8 py-4"
+            >
+              🔊 Test Audio
             </Button>
 
             <Button
