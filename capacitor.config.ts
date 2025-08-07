@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.89d0a2880a7a40a19d85559f505f367c',
-  appName: 'chat-translate-live',
+  appId: 'com.conversaflow.ai',
+  appName: 'coversaflow-ai',
   webDir: 'dist',
   server: {
     url: 'https://89d0a288-0a7a-40a1-9d85-559f505f367c.lovableproject.com?forceHideBadge=true',
