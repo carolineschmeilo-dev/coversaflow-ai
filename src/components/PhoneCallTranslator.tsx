@@ -242,47 +242,52 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
     onEndCall?.();
   };
 
-  // Test function to check ElevenLabs connection
+  // Test function to check audio with user interaction
   const testElevenLabs = async () => {
     try {
+      console.log('Testing audio with user interaction...');
+      
+      // Test with a simple HTML5 audio beep first
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // Resume audio context (required on mobile)
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+        console.log('Audio context resumed');
+      }
+      
+      // Create a simple beep sound
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = 800; // 800 Hz tone
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.5);
+      
       toast({
-        title: "Testing Audio",
-        description: "Attempting to generate test audio...",
+        title: "Audio Test",
+        description: "You should hear a beep sound. If you do, audio is working!",
       });
       
-      // First try browser speech synthesis as a simple test
-      if ('speechSynthesis' in window) {
-        speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance("Hello, this is a test of audio playback.");
-        utterance.volume = volume;
-        utterance.rate = 0.9;
-        
-        utterance.onstart = () => console.log('Test speech started');
-        utterance.onend = () => {
-          console.log('Test speech ended');
-          toast({
-            title: "Audio Test Success",
-            description: "Browser speech synthesis is working!",
-          });
-        };
-        utterance.onerror = (e) => {
-          console.error('Test speech error:', e);
-          toast({
-            title: "Audio Test Failed",
-            description: "Browser speech synthesis failed",
-            variant: "destructive",
-          });
-        };
-        
-        speechSynthesis.speak(utterance);
-      } else {
-        toast({
-          title: "Audio Not Available",
-          description: "Speech synthesis not supported in this browser",
-          variant: "destructive",
-        });
-      }
+      // Now try speech synthesis
+      setTimeout(() => {
+        if ('speechSynthesis' in window) {
+          speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance("Audio test successful!");
+          utterance.volume = 1.0;
+          utterance.rate = 1.0;
+          speechSynthesis.speak(utterance);
+        }
+      }, 1000);
+      
     } catch (error) {
+      console.error('Audio test failed:', error);
       toast({
         title: "Audio Test Failed",
         description: `Error: ${error}`,

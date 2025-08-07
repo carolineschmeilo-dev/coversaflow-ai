@@ -13,8 +13,8 @@ interface UseTranslationReturn {
   error: string | null;
 }
 
-// Free translation service using LibreTranslate API (we'll use a public instance)
-const LIBRE_TRANSLATE_URL = 'https://translate.argosopentech.com/translate';
+// Using Google Translate API as a more reliable fallback
+const GOOGLE_TRANSLATE_URL = 'https://translate.googleapis.com/translate_a/single';
 
 const languageMap: Record<string, string> = {
   'en': 'en',
@@ -56,63 +56,64 @@ export const useTranslation = (): UseTranslationReturn => {
     setError(null);
 
     try {
-      // Map our language codes to LibreTranslate codes
+      // Map our language codes to the appropriate codes
       const sourceCode = languageMap[from] || from;
       const targetCode = languageMap[to] || to;
+      
+      // Use a simple Google Translate scraping approach
+      const params = new URLSearchParams({
+        client: 'gtx',
+        sl: sourceCode,
+        tl: targetCode,
+        dt: 't',
+        q: text
+      });
 
-      const response = await fetch(LIBRE_TRANSLATE_URL, {
-        method: 'POST',
+      const response = await fetch(`${GOOGLE_TRANSLATE_URL}?${params}`, {
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (compatible; translator)',
         },
-        body: JSON.stringify({
-          q: text,
-          source: sourceCode,
-          target: targetCode,
-          format: 'text'
-        })
       });
 
       if (!response.ok) {
-        // Fallback to a simple mock translation for demo
         throw new Error('Translation service unavailable');
       }
 
       const data = await response.json();
+      const translatedText = data[0]?.[0]?.[0] || text;
       
       return {
-        translatedText: data.translatedText || text,
+        translatedText,
         sourceLanguage: from,
         targetLanguage: to,
         confidence: 0.9
       };
     } catch (err) {
-      // Fallback mock translation for demo purposes
-      console.warn('Translation service failed, using mock translation:', err);
+      console.warn('Google Translate failed, using simple translation logic:', err);
       
-      const mockTranslations: Record<string, Record<string, string>> = {
+      // Very simple word replacement for demo
+      const simpleTranslations: Record<string, Record<string, string>> = {
         'en': {
-          'es': 'Hola, esto es una traducción de demostración.',
-          'fr': 'Bonjour, ceci est une traduction de démonstration.',
-          'de': 'Hallo, das ist eine Demo-Übersetzung.',
+          'es': text.replace(/hello/gi, 'hola').replace(/how are you/gi, 'cómo estás').replace(/thank you/gi, 'gracias'),
+          'pt-BR': text.replace(/hello/gi, 'olá').replace(/how are you/gi, 'como vai').replace(/thank you/gi, 'obrigado'),
+          'fr': text.replace(/hello/gi, 'bonjour').replace(/how are you/gi, 'comment allez-vous').replace(/thank you/gi, 'merci'),
         },
         'es': {
-          'en': 'Hello, this is a demo translation.',
-          'fr': 'Bonjour, ceci est une traduction de démonstration.',
+          'en': text.replace(/hola/gi, 'hello').replace(/cómo estás/gi, 'how are you').replace(/gracias/gi, 'thank you'),
         },
-        'fr': {
-          'en': 'Hello, this is a demo translation.',
-          'es': 'Hola, esto es una traducción de demostración.',
+        'pt-BR': {
+          'en': text.replace(/olá/gi, 'hello').replace(/como vai/gi, 'how are you').replace(/obrigado/gi, 'thank you'),
         }
       };
 
-      const mockResult = mockTranslations[from]?.[to] || `[Demo translation from ${from} to ${to}]: ${text}`;
+      const translatedText = simpleTranslations[from]?.[to] || `[${to.toUpperCase()}]: ${text}`;
       
       return {
-        translatedText: mockResult,
+        translatedText,
         sourceLanguage: from,
         targetLanguage: to,
-        confidence: 0.8
+        confidence: 0.7
       };
     } finally {
       setIsTranslating(false);
