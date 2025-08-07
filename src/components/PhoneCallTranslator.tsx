@@ -79,19 +79,35 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
   }, [phoneIntegration]);
 
   const speakTranslationDuringCall = useCallback(async (text: string, language: string) => {
-    if (!text || !phoneIntegration.callState.isActive) return;
+    if (!text || !phoneIntegration.callState.isActive) {
+      console.log('Not speaking - no text or call not active:', { text, isActive: phoneIntegration.callState.isActive });
+      return;
+    }
 
     try {
       console.log('Speaking translation with ElevenLabs:', { text, language });
       await elevenLabsTTS.speak({ 
         text, 
         language,
-        // You can specify a specific voice ID here if needed
       });
+      console.log('ElevenLabs TTS completed successfully');
     } catch (error) {
-      console.error('ElevenLabs TTS during call error:', error);
+      console.error('ElevenLabs TTS failed, falling back to browser speech:', error);
+      
+      // Fallback to browser speech synthesis
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        const voice = speechSynthesis.getVoices().find(v => v.lang.startsWith(language));
+        if (voice) utterance.voice = voice;
+        utterance.volume = volume;
+        utterance.rate = 0.9;
+        
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utterance);
+        console.log('Browser speech synthesis started as fallback');
+      }
     }
-  }, [elevenLabsTTS, phoneIntegration.callState.isActive]);
+  }, [elevenLabsTTS, phoneIntegration.callState.isActive, volume]);
 
   const handleNewSpeech = useCallback(async (
     text: string, 
@@ -131,11 +147,16 @@ export function PhoneCallTranslator({ onEndCall }: PhoneCallTranslatorProps) {
       ));
 
       // Speak the translation during the call
+      console.log('Translation result:', result);
       if (result.translatedText && result.translatedText !== text) {
+        console.log('Attempting to speak translation:', result.translatedText, toLang);
         speakTranslationDuringCall(result.translatedText, toLang);
+      } else {
+        console.log('No translation to speak - text unchanged or empty');
       }
 
     } catch (error) {
+      console.error('Translation error:', error);
       toast({
         title: "Translation Error",
         description: "Failed to translate speech.",
