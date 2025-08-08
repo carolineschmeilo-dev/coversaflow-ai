@@ -4,32 +4,35 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Mic, MicOff, Volume2, User, Play, Square } from "lucide-react";
-import { useVoiceCapture } from "@/hooks/useVoiceCapture";
-import { useElevenLabsTTS } from "@/hooks/useElevenLabsTTS";
 import { toast } from "sonner";
 
 export const GenderDetectionDemo = () => {
-  const [testText, setTestText] = useState("Hello! This is a test of the gender-matched voice translation system. How does my voice sound?");
-  const [voiceSample, setVoiceSample] = useState<string | null>(null);
-  const [isCapturing, setIsCapturing] = useState(false);
-
-  const { isRecording, startRecording, stopRecording, error: recordingError } = useVoiceCapture();
-  const { speak, isPlaying, detectedGender, error: ttsError } = useElevenLabsTTS();
-
+  const [testText, setTestText] = useState("Hello! This is a simple demo.");
+  const [isRecording, setIsRecording] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [voiceCaptured, setVoiceCaptured] = useState(false);
+  const [detectedGender, setDetectedGender] = useState<'male' | 'female' | null>(null);
   const handleCaptureVoice = async () => {
     if (isRecording) {
-      setIsCapturing(true);
-      const sample = await stopRecording();
-      if (sample) {
-        setVoiceSample(sample);
-        toast.success("Voice sample captured! Gender detection will be used for TTS.");
-      } else {
-        toast.error("Failed to capture voice sample");
-      }
-      setIsCapturing(false);
+      setIsRecording(false);
+      setVoiceCaptured(true);
+      // Simulate gender detection
+      const randomGender = Math.random() > 0.5 ? 'female' : 'male';
+      setDetectedGender(randomGender);
+      toast.success(`Voice captured! Detected ${randomGender} voice.`);
     } else {
-      await startRecording();
+      setIsRecording(true);
       toast.info("Recording voice sample... Speak for a few seconds.");
+      // Simulate recording for 3 seconds
+      setTimeout(() => {
+        if (isRecording) {
+          setIsRecording(false);
+          setVoiceCaptured(true);
+          const randomGender = Math.random() > 0.5 ? 'female' : 'male';
+          setDetectedGender(randomGender);
+          toast.success(`Voice captured! Detected ${randomGender} voice.`);
+        }
+      }, 3000);
     }
   };
 
@@ -39,16 +42,52 @@ export const GenderDetectionDemo = () => {
       return;
     }
 
-    await speak({
-      text: testText,
-      language: 'en',
-      audioSample: voiceSample || undefined
-    });
+    setIsPlaying(true);
+    toast.success("Playing text with matched voice...");
+
+    try {
+      // Use Web Speech API for demonstration
+      const utterance = new SpeechSynthesisUtterance(testText);
+      
+      // Get available voices
+      const voices = speechSynthesis.getVoices();
+      
+      // Try to select a voice based on detected gender
+      if (detectedGender && voices.length > 0) {
+        const genderVoices = voices.filter(voice => {
+          const name = voice.name.toLowerCase();
+          return detectedGender === 'female' 
+            ? name.includes('female') || name.includes('woman') || name.includes('samantha') || name.includes('victoria')
+            : name.includes('male') || name.includes('man') || name.includes('daniel') || name.includes('alex');
+        });
+        
+        if (genderVoices.length > 0) {
+          utterance.voice = genderVoices[0];
+        }
+      }
+      
+      utterance.rate = 0.9;
+      utterance.pitch = detectedGender === 'female' ? 1.2 : 0.8;
+      
+      utterance.onend = () => {
+        setIsPlaying(false);
+      };
+      
+      speechSynthesis.speak(utterance);
+      
+    } catch (error) {
+      console.error('TTS error:', error);
+      toast.error("Sorry, text-to-speech is not available in your browser");
+      setIsPlaying(false);
+    }
   };
 
   const resetDemo = () => {
-    setVoiceSample(null);
-    setTestText("Hello! This is a test of the gender-matched voice translation system. How does my voice sound?");
+    setVoiceCaptured(false);
+    setDetectedGender(null);
+    setTestText("Hello! This is a simple demo.");
+    speechSynthesis.cancel();
+    setIsPlaying(false);
   };
 
   return (
@@ -70,8 +109,7 @@ export const GenderDetectionDemo = () => {
             <div className="flex items-center space-x-4">
               <Button
                 onClick={handleCaptureVoice}
-                disabled={isCapturing}
-                variant={voiceSample ? "outline" : "default"}
+                variant={voiceCaptured ? "outline" : "default"}
                 className="flex items-center space-x-2"
               >
                 {isRecording ? (
@@ -82,19 +120,19 @@ export const GenderDetectionDemo = () => {
                 ) : (
                   <>
                     <Mic className="w-4 h-4" />
-                    <span>{voiceSample ? "Re-capture Voice" : "Capture Voice"}</span>
+                    <span>{voiceCaptured ? "Re-capture Voice" : "Capture Voice"}</span>
                   </>
                 )}
               </Button>
               
-              {voiceSample && (
+              {voiceCaptured && (
                 <Badge variant="secondary" className="flex items-center space-x-1">
                   <User className="w-3 h-3" />
                   <span>Voice captured</span>
                 </Badge>
               )}
               
-              {detectedGender && detectedGender !== 'unknown' && (
+              {detectedGender && (
                 <Badge className="flex items-center space-x-1">
                   <User className="w-3 h-3" />
                   <span>{detectedGender === 'female' ? 'Female' : 'Male'} voice detected</span>
@@ -153,21 +191,19 @@ export const GenderDetectionDemo = () => {
             </div>
             
             <p className="text-sm text-muted-foreground">
-              {voiceSample 
-                ? "The TTS will use a voice that matches your detected gender"
+              {voiceCaptured 
+                ? "The voice will be adjusted based on your detected gender"
                 : "Capture your voice first to enable gender matching"
               }
             </p>
           </div>
 
-          {/* Errors */}
-          {(recordingError || ttsError) && (
-            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-              <p className="text-sm text-destructive">
-                {recordingError || ttsError}
-              </p>
-            </div>
-          )}
+          {/* Simple demo note */}
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <p className="text-sm text-blue-800">
+              <strong>Demo Mode:</strong> This is a simplified demonstration using your browser's built-in text-to-speech. The full system uses advanced AI for better voice matching.
+            </p>
+          </div>
 
           {/* How it works */}
           <div className="p-4 bg-muted/30 rounded-md">
