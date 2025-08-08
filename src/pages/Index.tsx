@@ -165,14 +165,22 @@ const Index = () => {
             <span className="font-semibold text-foreground">ConversaFlow</span>
           </div>
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <User className="w-4 h-4" />
-              <span>{user?.email}</span>
-            </div>
-            <Button variant="outline" size="sm" onClick={signOut}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
-            </Button>
+            {user ? (
+              <>
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                  <User className="w-4 h-4" />
+                  <span>{user?.email}</span>
+                </div>
+                <Button variant="outline" size="sm" onClick={signOut}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Button variant="default" size="sm" onClick={() => window.location.href = '/auth'}>
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -195,44 +203,59 @@ const Index = () => {
           
           {/* CTA Buttons */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 justify-center mb-12 max-w-4xl mx-auto">
-            <Button 
-              size="lg" 
-              className="px-8 py-4 text-lg"
-              onClick={startCallSetup}
-            >
-              <Phone className="mr-2 h-5 w-5" />
-              Start Call
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="px-8 py-4 text-lg"
-              onClick={() => setCurrentScreen('contacts')}
-            >
-              <Users className="mr-2 h-5 w-5" />
-              Contacts
-            </Button>
+            {user ? (
               <Button 
                 size="lg" 
-                variant="outline"
                 className="px-8 py-4 text-lg"
-                onClick={() => setCurrentScreen('history')}
+                onClick={startCallSetup}
               >
-                <History className="mr-2 h-5 w-5" />
-                Call History
+                <Phone className="mr-2 h-5 w-5" />
+                Start Call
               </Button>
-
-              {isAdmin && (
+            ) : (
+              <Button 
+                size="lg" 
+                className="px-8 py-4 text-lg"
+                onClick={() => window.location.href = '/auth'}
+              >
+                <Phone className="mr-2 h-5 w-5" />
+                Sign In to Start
+              </Button>
+            )}
+            {user && (
+              <>
                 <Button 
                   size="lg" 
                   variant="outline"
                   className="px-8 py-4 text-lg"
-                  onClick={() => setCurrentScreen('analytics')}
+                  onClick={() => setCurrentScreen('contacts')}
                 >
-                  <BarChart3 className="mr-2 h-5 w-5" />
-                  Analytics
+                  <Users className="mr-2 h-5 w-5" />
+                  Contacts
                 </Button>
-              )}
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="px-8 py-4 text-lg"
+                  onClick={() => setCurrentScreen('history')}
+                >
+                  <History className="mr-2 h-5 w-5" />
+                  Call History
+                </Button>
+
+                {isAdmin && (
+                  <Button 
+                    size="lg" 
+                    variant="outline"
+                    className="px-8 py-4 text-lg"
+                    onClick={() => setCurrentScreen('analytics')}
+                  >
+                    <BarChart3 className="mr-2 h-5 w-5" />
+                    Analytics
+                  </Button>
+                )}
+              </>
+            )}
             <Button 
               size="lg" 
               variant="outline"
@@ -304,15 +327,27 @@ const Index = () => {
         <div className="bg-gradient-to-r from-primary to-primary/80 rounded-2xl p-8 text-center text-primary-foreground mb-16">
           <h2 className="text-3xl font-bold mb-4">Ready to Connect Across Languages?</h2>
           <p className="text-xl mb-6 opacity-90">Start your first translated call today</p>
-          <Button 
-            size="lg" 
-            variant="secondary"
-            className="px-8 py-4 text-lg"
-            onClick={startCallSetup}
-          >
-            <Phone className="mr-2 h-5 w-5" />
-            Start Translation Call
-          </Button>
+          {user ? (
+            <Button 
+              size="lg" 
+              variant="secondary"
+              className="px-8 py-4 text-lg"
+              onClick={startCallSetup}
+            >
+              <Phone className="mr-2 h-5 w-5" />
+              Start Translation Call
+            </Button>
+          ) : (
+            <Button 
+              size="lg" 
+              variant="secondary"
+              className="px-8 py-4 text-lg"
+              onClick={() => window.location.href = '/auth'}
+            >
+              <Phone className="mr-2 h-5 w-5" />
+              Sign In to Start Calling
+            </Button>
+          )}
           <div className="mt-8 text-sm opacity-75">
             <p>Available as a mobile app soon!</p>
           </div>
