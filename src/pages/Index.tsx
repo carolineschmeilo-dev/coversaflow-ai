@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Phone, Languages, Mail, LogOut, User, TestTube, Users, History } from "lucide-react";
+import { Phone, Languages, Mail, LogOut, User, TestTube, Users, History, BarChart3, ArrowLeft } from "lucide-react";
 import { CallSetup } from "@/components/CallSetup";
 import { ActiveCall } from "@/components/ActiveCall";
 import { GenderDetectionDemo } from "@/components/GenderDetectionDemo";
 import { ContactsManager } from "@/components/ContactsManager";
+import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdmin } from "@/hooks/useAdmin";
 
 interface CallConfiguration {
   myLanguage: string;
@@ -15,9 +17,10 @@ interface CallConfiguration {
 }
 
 const Index = () => {
-  const [currentScreen, setCurrentScreen] = useState<'home' | 'setup' | 'call' | 'demo' | 'contacts' | 'history'>('home');
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'setup' | 'call' | 'demo' | 'contacts' | 'history' | 'analytics'>('home');
   const [callConfig, setCallConfig] = useState<CallConfiguration | null>(null);
   const { user, signOut } = useAuth();
+  const { isAdmin } = useAdmin();
 
   const startCallSetup = () => {
     setCurrentScreen('setup');
@@ -131,6 +134,27 @@ const Index = () => {
     );
   }
 
+  if (currentScreen === 'analytics') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5 p-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
+            <Button 
+              variant="outline" 
+              onClick={() => setCurrentScreen('home')}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Home
+            </Button>
+          </div>
+          <AnalyticsDashboard />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
       {/* Header with auth info */}
@@ -188,15 +212,27 @@ const Index = () => {
               <Users className="mr-2 h-5 w-5" />
               Contacts
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="px-8 py-4 text-lg"
-              onClick={() => setCurrentScreen('history')}
-            >
-              <History className="mr-2 h-5 w-5" />
-              Call History
-            </Button>
+              <Button 
+                size="lg" 
+                variant="outline"
+                className="px-8 py-4 text-lg"
+                onClick={() => setCurrentScreen('history')}
+              >
+                <History className="mr-2 h-5 w-5" />
+                Call History
+              </Button>
+
+              {isAdmin && (
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="px-8 py-4 text-lg"
+                  onClick={() => setCurrentScreen('analytics')}
+                >
+                  <BarChart3 className="mr-2 h-5 w-5" />
+                  Analytics
+                </Button>
+              )}
             <Button 
               size="lg" 
               variant="outline"

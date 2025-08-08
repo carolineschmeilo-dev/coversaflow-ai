@@ -218,19 +218,19 @@ export type Database = {
       }
     }
     Views: {
-      analytics_summary: {
-        Row: {
-          avg_call_duration: number | null
-          daily_calls: number | null
-          daily_signups: number | null
-          daily_translations: number | null
-          signup_date: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_analytics_data: {
+        Args: { start_date?: string; end_date?: string }
+        Returns: {
+          date: string
+          daily_signups: number
+          daily_calls: number
+          avg_call_duration: number
+          daily_translations: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
