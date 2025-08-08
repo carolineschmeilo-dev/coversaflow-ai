@@ -82,9 +82,9 @@ export const ContactPicker = ({ onSelectContact, children }: ContactPickerProps)
               <Users className="w-8 h-8 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold mb-2">Access Your Contacts</h3>
+              <h3 className="font-semibold mb-2">Access Your Phone Book</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Allow ConversaFlow to access your contacts to quickly select who to call.
+                Allow ConversaFlow to access your phone book to quickly select who to call.
               </p>
               <Button onClick={handleRequestPermission}>
                 <Users className="w-4 h-4 mr-2" />
@@ -97,7 +97,7 @@ export const ContactPicker = ({ onSelectContact, children }: ContactPickerProps)
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Search contacts..."
+                placeholder="Search phone book..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -107,7 +107,7 @@ export const ContactPicker = ({ onSelectContact, children }: ContactPickerProps)
             {loading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                <p className="text-sm text-muted-foreground mt-2">Loading contacts...</p>
+                <p className="text-sm text-muted-foreground mt-2">Loading phone book...</p>
               </div>
             ) : error ? (
               <div className="text-center py-8">
@@ -122,7 +122,7 @@ export const ContactPicker = ({ onSelectContact, children }: ContactPickerProps)
                   {filteredContacts.length === 0 ? (
                     <div className="text-center py-8">
                       <p className="text-sm text-muted-foreground">
-                        {searchTerm ? "No contacts found" : "No contacts available"}
+                        {searchTerm ? "No people found" : "No phone book entries available"}
                       </p>
                     </div>
                   ) : (
