@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.89d0a2880a7a40a19d85559f505f367c',
+  appId: 'com.conversaflow.transbridge',
   appName: 'TransBridge',
   webDir: 'dist',
   server: {
