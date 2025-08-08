@@ -1,22 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Languages, TestTube, Clock, AlertTriangle } from "lucide-react";
-import { ActiveCall } from "@/components/ActiveCall";
-import { CallSetup } from "@/components/CallSetup";
+import { GenderDetectionDemo } from "@/components/GenderDetectionDemo";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { DemoLimiter } from "@/utils/demoLimiter";
 import { toast } from "sonner";
 
-interface CallConfiguration {
-  myLanguage: string;
-  theirLanguage: string;
-  theirPhoneNumber: string;
-  myPhoneNumber: string;
-}
-
 const CallDemo = () => {
-  const [currentScreen, setCurrentScreen] = useState<'intro' | 'setup' | 'call' | 'blocked'>('intro');
-  const [callConfig, setCallConfig] = useState<CallConfiguration | null>(null);
+  const [currentScreen, setCurrentScreen] = useState<'intro' | 'demo' | 'blocked'>('intro');
   const [demoLimitInfo, setDemoLimitInfo] = useState<{ allowed: boolean; remaining: number; reason?: string } | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(300); // 5 minutes
 
@@ -32,7 +23,7 @@ const CallDemo = () => {
 
   useEffect(() => {
     // Time tracking for active demo
-    if (currentScreen === 'call') {
+    if (currentScreen === 'demo') {
       const startTime = Date.now();
       const timer = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
@@ -41,7 +32,7 @@ const CallDemo = () => {
         
         if (remaining === 0) {
           toast.error("Demo time limit reached. Create an account for unlimited access!");
-          endCall();
+          setCurrentScreen('intro');
         }
       }, 1000);
 
@@ -49,7 +40,7 @@ const CallDemo = () => {
     }
   }, [currentScreen]);
 
-  const startSetup = () => {
+  const startDemo = () => {
     const limitCheck = DemoLimiter.canUseDemo();
     if (!limitCheck.allowed) {
       setCurrentScreen('blocked');
@@ -59,18 +50,12 @@ const CallDemo = () => {
     
     DemoLimiter.trackDemoUsage();
     DemoLimiter.createDemoSession();
-    setCurrentScreen('setup');
+    setCurrentScreen('demo');
   };
 
-  const startCall = (config: CallConfiguration) => {
-    setCallConfig(config);
-    setCurrentScreen('call');
-  };
-
-  const endCall = () => {
+  const endDemo = () => {
     DemoLimiter.endDemoSession();
     setCurrentScreen('intro');
-    setCallConfig(null);
   };
 
   const goToAuth = () => {
@@ -119,16 +104,16 @@ const CallDemo = () => {
     );
   }
 
-  // Show call interface
-  if (currentScreen === 'call' && callConfig) {
+  // Show voice demo
+  if (currentScreen === 'demo') {
     return (
-      <div className="relative">
+      <div className="relative min-h-screen bg-gradient-to-br from-background to-secondary/20">
         {/* Demo banner with timer */}
         <div className="bg-primary/10 border-b border-primary/20 p-2">
           <div className="flex items-center justify-between max-w-4xl mx-auto">
             <p className="text-sm">
               <TestTube className="inline w-4 h-4 mr-1" />
-              <strong>Interactive Demo</strong> - Exploring the interface
+              <strong>Voice Demo</strong> - Try the AI translation features
             </p>
             <div className="flex items-center space-x-2 text-sm">
               <Clock className="w-4 h-4" />
@@ -138,30 +123,25 @@ const CallDemo = () => {
             </div>
           </div>
         </div>
-        
-        <ActiveCall
-          myLanguage={callConfig.myLanguage}
-          theirLanguage={callConfig.theirLanguage}
-          theirPhoneNumber={callConfig.theirPhoneNumber}
-          onEndCall={endCall}
-        />
-      </div>
-    );
-  }
 
-  // Show setup
-  if (currentScreen === 'setup') {
-    return (
-      <div className="relative">
-        {/* Demo banner */}
-        <div className="bg-primary/10 border-b border-primary/20 p-2 text-center">
-          <p className="text-sm">
-            <TestTube className="inline w-4 h-4 mr-1" />
-            <strong>Demo Mode</strong> - Try the translation setup
-          </p>
+        {/* Header */}
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center space-x-2">
+              <Languages className="w-6 h-6 text-primary" />
+              <span className="font-semibold text-foreground">ConversaFlow Demo</span>
+            </div>
+            <Button variant="outline" onClick={endDemo}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Demo Intro
+            </Button>
+          </div>
         </div>
-        
-        <CallSetup onStartCall={startCall} />
+
+        {/* Demo Content */}
+        <div className="container mx-auto px-4 py-8">
+          <GenderDetectionDemo />
+        </div>
       </div>
     );
   }
@@ -193,11 +173,11 @@ const CallDemo = () => {
               </div>
             </div>
             <h1 className="text-4xl font-bold text-foreground mb-4">
-              See How ConversaFlow Works
+              Try Our AI Voice Features
               <span className="block text-2xl text-primary mt-2">Interactive Demo</span>
             </h1>
             <p className="text-xl text-muted-foreground">
-              Explore our AI translation interface and features in this interactive demonstration
+              Test gender detection and voice matching technology in your browser
             </p>
           </div>
 
@@ -207,9 +187,9 @@ const CallDemo = () => {
               <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto">
                 <Languages className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold mb-2">Interface Preview</h3>
+              <h3 className="font-semibold mb-2">Voice Capture</h3>
               <p className="text-sm text-muted-foreground">
-                See how our translation interface works with 10+ languages
+                Record your voice and see how our AI analyzes it
               </p>
             </div>
             
@@ -219,7 +199,7 @@ const CallDemo = () => {
               </div>
               <h3 className="font-semibold mb-2">Gender Detection</h3>
               <p className="text-sm text-muted-foreground">
-                AI matches voice gender for natural conversations
+                AI detects voice characteristics for natural conversations
               </p>
             </div>
             
@@ -227,9 +207,9 @@ const CallDemo = () => {
               <div className="bg-accent/50 w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto">
                 <Languages className="h-6 w-6 text-accent-foreground" />
               </div>
-              <h3 className="font-semibold mb-2">Smart Features</h3>
+              <h3 className="font-semibold mb-2">Voice Matching</h3>
               <p className="text-sm text-muted-foreground">
-                Slang detection, confidence scores, and clarifications
+                Text-to-speech with gender-matched voices
               </p>
             </div>
           </div>
@@ -239,22 +219,22 @@ const CallDemo = () => {
             <Button 
               size="lg" 
               className="px-12 py-4 text-lg"
-              onClick={startSetup}
+              onClick={startDemo}
             >
               <TestTube className="mr-2 h-5 w-5" />
-              Explore the Interface
+              Try Voice Demo
             </Button>
             
             <p className="text-sm text-muted-foreground">
-              No signup required • Interactive demo • Takes 2 minutes
+              No signup required • Works in your browser • Takes 2 minutes
             </p>
           </div>
 
           {/* Sign Up Encouragement */}
           <div className="bg-muted/30 rounded-xl p-6 mt-12">
-            <h3 className="font-semibold mb-2">Want to save your contacts and call history?</h3>
+            <h3 className="font-semibold mb-2">Ready for real phone translations?</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Create a free account to access contacts management, call history, and favorites
+              Create a free account to make actual translated calls with contacts and call history
             </p>
             <Button variant="outline" onClick={goToAuth}>
               Create Free Account
@@ -270,8 +250,8 @@ const CallDemo = () => {
                 <ul className="text-sm text-muted-foreground space-y-1">
                   <li>• Maximum 3 demos per day</li>
                   <li>• 5-minute time limit per session</li>
-                  <li>• No data persistence</li>
-                  <li>• Simulated conversation only</li>
+                  <li>• Voice demo only (no actual calls)</li>
+                  <li>• Uses browser text-to-speech</li>
                 </ul>
                 {demoLimitInfo && (
                   <p className="text-sm font-medium mt-2">
