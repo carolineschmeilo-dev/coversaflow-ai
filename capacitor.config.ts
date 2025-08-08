@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.conversaflow.transbridge',
-  appName: 'TransBridge',
+  appId: 'com.coversaflow.transbridge',
+  appName: 'CoversaFlow',
   webDir: 'dist',
   server: {
     url: "https://89d0a288-0a7a-40a1-9d85-559f505f367c.lovableproject.com?forceHideBadge=true",
