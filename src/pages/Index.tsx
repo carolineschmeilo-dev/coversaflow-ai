@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Phone, Languages, Mail, LogOut, User } from "lucide-react";
+import { Phone, Languages, Mail, LogOut, User, TestTube } from "lucide-react";
 import { CallSetup } from "@/components/CallSetup";
 import { ActiveCall } from "@/components/ActiveCall";
+import { GenderDetectionDemo } from "@/components/GenderDetectionDemo";
 import { useAuth } from "@/hooks/useAuth";
 
 interface CallConfiguration {
@@ -13,7 +14,7 @@ interface CallConfiguration {
 }
 
 const Index = () => {
-  const [currentScreen, setCurrentScreen] = useState<'home' | 'setup' | 'call'>('home');
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'setup' | 'call' | 'demo'>('home');
   const [callConfig, setCallConfig] = useState<CallConfiguration | null>(null);
   const { user, signOut } = useAuth();
 
@@ -44,6 +45,44 @@ const Index = () => {
         theirPhoneNumber={callConfig.theirPhoneNumber}
         onEndCall={endCall}
       />
+    );
+  }
+
+  if (currentScreen === 'demo') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
+        {/* Header */}
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center space-x-2">
+              <Languages className="w-6 h-6 text-primary" />
+              <span className="font-semibold text-foreground">ConversaFlow</span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setCurrentScreen('home')}
+              >
+                Back to Home
+              </Button>
+              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                <User className="w-4 h-4" />
+                <span>{user?.email}</span>
+              </div>
+              <Button variant="outline" size="sm" onClick={signOut}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Demo Content */}
+        <div className="container mx-auto px-4 py-8">
+          <GenderDetectionDemo />
+        </div>
+      </div>
     );
   }
 
@@ -94,6 +133,15 @@ const Index = () => {
             >
               <Phone className="mr-2 h-5 w-5" />
               Start Translation Call
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline"
+              className="px-8 py-4 text-lg"
+              onClick={() => setCurrentScreen('demo')}
+            >
+              <TestTube className="mr-2 h-5 w-5" />
+              Try Gender Detection
             </Button>
           </div>
         </div>

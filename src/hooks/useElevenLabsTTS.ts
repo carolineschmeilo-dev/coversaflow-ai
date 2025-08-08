@@ -5,6 +5,7 @@ interface ElevenLabsTTSOptions {
   text: string;
   language?: string;
   voiceId?: string;
+  audioSample?: string; // Base64 encoded audio sample for gender detection
 }
 
 interface UseElevenLabsTTSReturn {
@@ -12,12 +13,14 @@ interface UseElevenLabsTTSReturn {
   isPlaying: boolean;
   stopSpeaking: () => void;
   error: string | null;
+  detectedGender?: 'male' | 'female' | 'unknown';
 }
 
 export const useElevenLabsTTS = (): UseElevenLabsTTSReturn => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
+  const [detectedGender, setDetectedGender] = useState<'male' | 'female' | 'unknown'>('unknown');
 
   const stopSpeaking = useCallback(() => {
     if (currentAudio) {
@@ -28,8 +31,8 @@ export const useElevenLabsTTS = (): UseElevenLabsTTSReturn => {
     setIsPlaying(false);
   }, [currentAudio]);
 
-  const speak = useCallback(async ({ text, language = 'en', voiceId }: ElevenLabsTTSOptions) => {
-    console.log('ElevenLabs TTS called with:', { text, language, voiceId });
+  const speak = useCallback(async ({ text, language = 'en', voiceId, audioSample }: ElevenLabsTTSOptions) => {
+    console.log('ElevenLabs TTS called with:', { text, language, voiceId, hasAudioSample: !!audioSample });
     if (!text.trim()) return;
 
     setError(null);
@@ -40,9 +43,9 @@ export const useElevenLabsTTS = (): UseElevenLabsTTSReturn => {
     try {
       setIsPlaying(true);
 
-      console.log('Calling Supabase function...');
-      const { data, error: functionError } = await supabase.functions.invoke('elevenlabs-tts', {
-        body: { text, language, voiceId }
+      console.log('Calling detect-gender-and-tts function...');
+      const { data, error: functionError } = await supabase.functions.invoke('detect-gender-and-tts', {
+        body: { text, language, voiceId, audioSample }
       });
 
       console.log('Supabase function response:', { data, functionError });
@@ -52,14 +55,20 @@ export const useElevenLabsTTS = (): UseElevenLabsTTSReturn => {
         throw new Error(functionError.message);
       }
 
-      if (!data.audio) {
+      if (!data.audioContent) {
         console.error('No audio data in response:', data);
         throw new Error('No audio data received');
       }
 
+      // Update detected gender if provided
+      if (data.detectedGender) {
+        setDetectedGender(data.detectedGender);
+        console.log('Gender detected:', data.detectedGender);
+      }
+
       // Create audio blob from base64
       console.log('Creating audio blob from base64 data...');
-      const audioBytes = Uint8Array.from(atob(data.audio), c => c.charCodeAt(0));
+      const audioBytes = Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0));
       const audioBlob = new Blob([audioBytes], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
 
@@ -99,6 +108,7 @@ export const useElevenLabsTTS = (): UseElevenLabsTTSReturn => {
     speak,
     isPlaying,
     stopSpeaking,
-    error
+    error,
+    detectedGender
   };
 };
