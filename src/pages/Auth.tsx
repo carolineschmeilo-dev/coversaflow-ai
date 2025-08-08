@@ -74,16 +74,6 @@ const Auth = () => {
     setError("");
 
     try {
-      // Clean up existing state
-      cleanupAuthState();
-      
-      // Attempt global sign out first
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch {
-        // Continue even if this fails
-      }
-
       const redirectUrl = `${window.location.origin}/`;
       
       const { data, error } = await supabase.auth.signUp({
@@ -100,7 +90,7 @@ const Auth = () => {
         toast.success("Check your email for the confirmation link!");
       } else if (data.session) {
         toast.success("Account created successfully!");
-        window.location.href = '/';
+        navigate('/');
       }
     } catch (error: any) {
       setError(error.message || "Failed to create account");
@@ -121,16 +111,6 @@ const Auth = () => {
     setError("");
 
     try {
-      // Clean up existing state
-      cleanupAuthState();
-      
-      // Attempt global sign out first
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch {
-        // Continue even if this fails
-      }
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -140,8 +120,7 @@ const Auth = () => {
 
       if (data.user) {
         toast.success("Signed in successfully!");
-        // Force page reload for clean state
-        window.location.href = '/';
+        navigate('/');
       }
     } catch (error: any) {
       setError(error.message || "Failed to sign in");
