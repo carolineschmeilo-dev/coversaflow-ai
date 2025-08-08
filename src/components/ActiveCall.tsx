@@ -2,7 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { PhoneOff, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { PhoneOff, Mic, MicOff, Volume2, VolumeX, AlertTriangle, RefreshCw } from 'lucide-react';
+import { translationService, TranslationResult } from '@/services/translationService';
+
+interface Message {
+  id: string;
+  text: string;
+  translation?: string;
+  speaker: 'user' | 'ai' | 'recipient';
+  timestamp: Date;
+  needsClarification?: boolean;
+  confidence?: number;
+  detectedSlang?: string[];
+}
 
 interface ActiveCallProps {
   myLanguage: string;
@@ -34,6 +46,8 @@ export const ActiveCall: React.FC<ActiveCallProps> = ({
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
   const [callStatus, setCallStatus] = useState<'connecting' | 'connected' | 'translating'>('connecting');
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isProcessingTranslation, setIsProcessingTranslation] = useState(false);
 
   const getLanguageInfo = (code: string) => {
     return languages.find(lang => lang.code === code) || { name: code, flag: '🌐' };
@@ -45,7 +59,11 @@ export const ActiveCall: React.FC<ActiveCallProps> = ({
   useEffect(() => {
     // Simulate call connection flow
     const timer1 = setTimeout(() => setCallStatus('connected'), 2000);
-    const timer2 = setTimeout(() => setCallStatus('translating'), 4000);
+    const timer2 = setTimeout(() => {
+      setCallStatus('translating');
+      // Start with demo conversation including slang
+      simulateConversation();
+    }, 4000);
 
     // Call duration timer
     const durationTimer = setInterval(() => {
@@ -58,6 +76,72 @@ export const ActiveCall: React.FC<ActiveCallProps> = ({
       clearInterval(durationTimer);
     };
   }, []);
+
+  const simulateConversation = async () => {
+    const demoMessages = [
+      { text: "Hello, how are you today?", speaker: 'user' as const },
+      { text: "That meeting was fire!", speaker: 'user' as const },
+      { text: "No cap, this project is bussin", speaker: 'user' as const },
+      { text: "I understand the proposal", speaker: 'user' as const }
+    ];
+
+    for (let i = 0; i < demoMessages.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      await processMessage(demoMessages[i].text, demoMessages[i].speaker);
+    }
+  };
+
+  const processMessage = async (text: string, speaker: 'user' | 'recipient') => {
+    const messageId = Date.now().toString();
+    
+    // Add original message
+    const originalMessage: Message = {
+      id: messageId,
+      text,
+      speaker,
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, originalMessage]);
+    setIsProcessingTranslation(true);
+
+    try {
+      // Translate the message
+      const result: TranslationResult = await translationService.translateWithFallback(
+        text, 
+        speaker === 'user' ? myLanguage : theirLanguage,
+        speaker === 'user' ? theirLanguage : myLanguage
+      );
+
+      // Add AI response
+      if (result.needsClarification) {
+        const clarificationMessage: Message = {
+          id: messageId + '_clarification',
+          text: translationService.getClarificationMessage(result.detectedSlang || []),
+          speaker: 'ai',
+          timestamp: new Date(),
+          needsClarification: true
+        };
+        setMessages(prev => [...prev, clarificationMessage]);
+      }
+
+      // Add translation
+      const translationMessage: Message = {
+        id: messageId + '_translation',
+        text: result.translatedText,
+        speaker: 'ai',
+        timestamp: new Date(),
+        confidence: result.confidence,
+        detectedSlang: result.detectedSlang
+      };
+      
+      setMessages(prev => [...prev, translationMessage]);
+    } catch (error) {
+      console.error('Translation error:', error);
+    } finally {
+      setIsProcessingTranslation(false);
+    }
+  };
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -128,15 +212,50 @@ export const ActiveCall: React.FC<ActiveCallProps> = ({
         {callStatus === 'translating' && (
           <Card className="mb-8">
             <CardContent className="p-4">
-              <div className="space-y-3">
-                <div className="bg-primary/10 rounded-lg p-3">
-                  <p className="text-sm text-foreground">"Hello, how are you today?"</p>
-                  <p className="text-xs text-muted-foreground mt-1">You • English</p>
-                </div>
-                <div className="bg-secondary/50 rounded-lg p-3">
-                  <p className="text-sm text-foreground">"Hola, ¿cómo estás hoy?"</p>
-                  <p className="text-xs text-muted-foreground mt-1">AI Translation • Spanish</p>
-                </div>
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {messages.map((message) => (
+                  <div key={message.id} className={`rounded-lg p-3 ${
+                    message.speaker === 'user' 
+                      ? 'bg-primary/10 ml-4' 
+                      : message.speaker === 'ai'
+                      ? 'bg-secondary/50 mx-2'
+                      : 'bg-accent/10 mr-4'
+                  }`}>
+                    <p className="text-sm text-foreground">{message.text}</p>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className="text-xs text-muted-foreground">
+                        {message.speaker === 'user' ? 'You' : 
+                         message.speaker === 'ai' ? 'AI Translation' : 
+                         theirPhoneNumber} • {message.speaker === 'user' ? myLangInfo.name : 
+                         message.speaker === 'ai' ? 'System' : theirLangInfo.name}
+                      </p>
+                      {message.needsClarification && (
+                        <Badge variant="destructive" className="text-xs">
+                          <AlertTriangle className="w-3 h-3 mr-1" />
+                          Needs Clarification
+                        </Badge>
+                      )}
+                      {message.confidence && message.confidence < 0.8 && (
+                        <Badge variant="secondary" className="text-xs">
+                          Low Confidence: {Math.round(message.confidence * 100)}%
+                        </Badge>
+                      )}
+                      {message.detectedSlang && message.detectedSlang.length > 0 && (
+                        <Badge variant="outline" className="text-xs">
+                          Slang: {message.detectedSlang.join(', ')}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {isProcessingTranslation && (
+                  <div className="bg-secondary/30 rounded-lg p-3 mx-2">
+                    <div className="flex items-center space-x-2">
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <p className="text-sm text-muted-foreground">Processing translation...</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -175,8 +294,11 @@ export const ActiveCall: React.FC<ActiveCallProps> = ({
         {/* Instructions */}
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-sm text-muted-foreground">
-              Speak naturally. The AI will translate in real-time and maintain the conversation flow.
+            <p className="text-sm text-muted-foreground mb-2">
+              Speak naturally. The AI will translate in real-time and ask for clarification when needed.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Using slang or local expressions? The AI will detect them and suggest clearer alternatives.
             </p>
           </CardContent>
         </Card>
