@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Phone, Languages, ArrowRight, Users } from 'lucide-react';
 import { ContactPicker } from './ContactPicker';
+import { useTwilioCall } from '@/hooks/useTwilioCall';
 
 interface CallSetupProps {
   onStartCall: (setup: CallConfiguration) => void;
@@ -36,22 +37,32 @@ export const CallSetup: React.FC<CallSetupProps> = ({ onStartCall }) => {
   const [theirLanguage, setTheirLanguage] = useState<string>('');
   const [theirPhoneNumber, setTheirPhoneNumber] = useState<string>('');
   const [contactName, setContactName] = useState<string>('');
-  // In a real app, this would come from user profile
-  const [myPhoneNumber] = useState<string>('+1 (555) 123-4567'); // Pre-populated
+  // Use your actual Twilio phone number
+  const [myPhoneNumber] = useState<string>('+14425001890'); // Your Twilio number
+  const { initiateCall, isLoading } = useTwilioCall();
 
   const handleContactSelect = (phoneNumber: string, name?: string) => {
     setTheirPhoneNumber(phoneNumber);
     setContactName(name || '');
   };
 
-  const handleStartCall = () => {
+  const handleStartCall = async () => {
     if (myLanguage && theirLanguage && theirPhoneNumber) {
-      onStartCall({
+      const result = await initiateCall({
         myLanguage,
         theirLanguage,
         theirPhoneNumber,
         myPhoneNumber
       });
+      
+      if (result.success) {
+        onStartCall({
+          myLanguage,
+          theirLanguage,
+          theirPhoneNumber,
+          myPhoneNumber
+        });
+      }
     }
   };
 
@@ -160,12 +171,12 @@ export const CallSetup: React.FC<CallSetupProps> = ({ onStartCall }) => {
 
             <Button 
               onClick={handleStartCall} 
-              disabled={!isValid}
+              disabled={!isValid || isLoading}
               className="w-full mt-6"
               size="lg"
             >
               <Phone className="w-4 h-4 mr-2" />
-              Start Translation Call
+              {isLoading ? 'Initiating Call...' : 'Start Translation Call'}
             </Button>
           </CardContent>
         </Card>
