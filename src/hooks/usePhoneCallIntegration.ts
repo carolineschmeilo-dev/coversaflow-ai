@@ -73,14 +73,22 @@ export const usePhoneCallIntegration = (): UsePhoneCallIntegrationReturn => {
 
   const requestPermissions = useCallback(async (): Promise<boolean> => {
     try {
+      console.log('Starting permission request...');
+      
       // Check if we're in a Capacitor native app
       const info = await Device.getInfo();
       const isNativeApp = Capacitor.isNativePlatform();
       
-      if (isNativeApp) {
-        // For native apps, provide clearer error messages
-        console.log('Requesting microphone permission on native platform:', info.platform);
+      console.log('Device info:', info);
+      console.log('Is native app:', isNativeApp);
+      
+      // First check if getUserMedia is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setError('Your device does not support microphone access.');
+        return false;
       }
+      
+      console.log('About to request microphone access...');
       
       // Request microphone permission through web API (works in both web and Capacitor)
       const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -92,16 +100,20 @@ export const usePhoneCallIntegration = (): UsePhoneCallIntegrationReturn => {
         } 
       });
       
+      console.log('Successfully got microphone access');
+      
       // Stop the test stream
       stream.getTracks().forEach(track => track.stop());
       
       return true;
     } catch (err) {
+      console.error('Permission request failed:', err);
+      
       if (err instanceof Error) {
         if (err.name === 'NotAllowedError') {
           const info = await Device.getInfo();
           if (info.platform === 'android' || info.platform === 'ios') {
-            setError('Microphone permission denied. Please go to your device Settings > Apps > ConversaFlow AI > Permissions and enable Microphone access.');
+            setError('Microphone permission denied. Please go to your device Settings > Apps > ConversaFlow AI > Permissions and enable Microphone access, then restart the app.');
           } else {
             setError('Microphone permission denied. Please allow microphone access when prompted or check your browser settings.');
           }
@@ -109,6 +121,16 @@ export const usePhoneCallIntegration = (): UsePhoneCallIntegrationReturn => {
           setError('No microphone found. Please ensure your device has a microphone and try again.');
         } else if (err.name === 'NotReadableError') {
           setError('Microphone is being used by another application. Please close other apps using the microphone and try again.');
+        } else if (err.name === 'OverconstrainedError') {
+          setError('Microphone constraints not supported. Trying with basic settings...');
+          // Try again with basic settings
+          try {
+            const basicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            basicStream.getTracks().forEach(track => track.stop());
+            return true;
+          } catch (basicErr) {
+            setError('Failed to access microphone even with basic settings.');
+          }
         } else {
           setError(`Microphone access failed: ${err.message}`);
         }
