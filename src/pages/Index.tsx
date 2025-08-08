@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Phone, Globe, Mic, MessageSquare, MessageCircle } from "lucide-react";
+import { Phone, Globe, Mic, MessageSquare, MessageCircle, Users } from "lucide-react";
 import { PhoneCallTranslator } from "@/components/PhoneCallTranslator";
+import { ConferenceBridge } from "@/components/ConferenceBridge";
 import conversaflowLogo from "@/assets/conversaflow-logo-final.png";
 import { EarlyAccessSignup } from "@/components/EarlyAccessSignup";
 
 const Index = () => {
   console.log("Index component rendering");
   const [isInCall, setIsInCall] = useState(false);
+  const [translationMode, setTranslationMode] = useState<"standard" | "conference">("conference");
 
-  const startCall = () => {
+  const startCall = (mode: "standard" | "conference" = "conference") => {
+    setTranslationMode(mode);
     setIsInCall(true);
   };
 
@@ -19,7 +22,11 @@ const Index = () => {
   };
 
   if (isInCall) {
-    return <PhoneCallTranslator onEndCall={endCall} />;
+    return translationMode === "conference" ? (
+      <ConferenceBridge onEndCall={endCall} />
+    ) : (
+      <PhoneCallTranslator onEndCall={endCall} />
+    );
   }
 
   return (
@@ -44,14 +51,23 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg" 
-              onClick={startCall}
+              onClick={() => startCall("conference")}
               className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
             >
+              <Users className="w-6 h-6 mr-2" />
+              Start Conference Bridge
+            </Button>
+            <Button 
+              size="lg" 
+              onClick={() => startCall("standard")}
+              variant="outline"
+              className="text-lg px-8 py-6 rounded-full border-2 hover:bg-muted transition-all duration-300"
+            >
               <Phone className="w-6 h-6 mr-2" />
-              Start Phone Translation
+              Standard Translation
             </Button>
           </div>
         </div>
@@ -61,11 +77,11 @@ const Index = () => {
           <Card className="p-6 bg-gradient-to-br from-card to-muted/20 border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-4">
               <div className="w-12 h-12 bg-gradient-to-r from-primary to-primary-glow rounded-lg flex items-center justify-center">
-                <Mic className="w-6 h-6 text-primary-foreground" />
+                <Users className="w-6 h-6 text-primary-foreground" />
               </div>
-              <h3 className="text-xl font-semibold">Real-Time Translation</h3>
+              <h3 className="text-xl font-semibold">Conference Bridge</h3>
               <p className="text-muted-foreground">
-                Instant voice translation with industry-leading accuracy and minimal latency.
+                Acts as a translation bridge between two people on a 3-way call.
               </p>
             </div>
           </Card>
@@ -85,11 +101,11 @@ const Index = () => {
           <Card className="p-6 bg-gradient-to-br from-card to-muted/20 border-success/10 hover:border-success/30 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-4">
               <div className="w-12 h-12 bg-gradient-to-r from-success to-accent rounded-lg flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-success-foreground" />
+                <Mic className="w-6 h-6 text-success-foreground" />
               </div>
-              <h3 className="text-xl font-semibold">Smart Context</h3>
+              <h3 className="text-xl font-semibold">Real-Time Translation</h3>
               <p className="text-muted-foreground">
-                AI-powered context understanding for accurate and natural translations.
+                Instant voice translation with AI-powered accuracy and context understanding.
               </p>
             </div>
           </Card>
@@ -103,9 +119,9 @@ const Index = () => {
               <div className="w-16 h-16 bg-gradient-to-r from-primary to-primary-glow rounded-full flex items-center justify-center mx-auto text-2xl font-bold text-primary-foreground">
                 1
               </div>
-              <h3 className="text-xl font-semibold">Select Languages</h3>
+              <h3 className="text-xl font-semibold">Setup Bridge</h3>
               <p className="text-muted-foreground">
-                Choose your language and your contact's language from our extensive list.
+                Both people install the app and set up their languages.
               </p>
             </div>
 
@@ -113,9 +129,9 @@ const Index = () => {
               <div className="w-16 h-16 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center mx-auto text-2xl font-bold text-accent-foreground">
                 2
               </div>
-              <h3 className="text-xl font-semibold">Start Talking</h3>
+              <h3 className="text-xl font-semibold">Create 3-Way Call</h3>
               <p className="text-muted-foreground">
-                Begin your conversation naturally - we'll handle the translation in real-time.
+                Start the translation bridge, then create a 3-way call with both people.
               </p>
             </div>
 
@@ -123,9 +139,9 @@ const Index = () => {
               <div className="w-16 h-16 bg-gradient-to-r from-success to-accent rounded-full flex items-center justify-center mx-auto text-2xl font-bold text-success-foreground">
                 3
               </div>
-              <h3 className="text-xl font-semibold">Connect Globally</h3>
+              <h3 className="text-xl font-semibold">Talk Naturally</h3>
               <p className="text-muted-foreground">
-                Enjoy seamless communication without language barriers.
+                The app translates between languages automatically during the call.
               </p>
             </div>
           </div>
@@ -141,11 +157,11 @@ const Index = () => {
             </p>
             <Button 
               size="lg" 
-              onClick={startCall}
+              onClick={() => startCall("conference")}
               className="bg-gradient-to-r from-primary to-accent hover:from-primary-glow hover:to-primary text-lg px-12 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <Phone className="w-6 h-6 mr-2" />
-              Try Phone Translation
+              <Users className="w-6 h-6 mr-2" />
+              Try Conference Bridge
             </Button>
             
             {/* Download Mobile App Section */}
