@@ -14,6 +14,98 @@ export type Database = {
   }
   public: {
     Tables: {
+      call_sessions: {
+        Row: {
+          contact_id: string | null
+          contact_language: string
+          contact_name: string | null
+          contact_phone: string
+          created_at: string
+          duration_seconds: number | null
+          ended_at: string | null
+          id: string
+          started_at: string
+          status: string | null
+          updated_at: string
+          user_id: string
+          user_language: string
+        }
+        Insert: {
+          contact_id?: string | null
+          contact_language?: string
+          contact_name?: string | null
+          contact_phone: string
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string | null
+          updated_at?: string
+          user_id: string
+          user_language?: string
+        }
+        Update: {
+          contact_id?: string | null
+          contact_language?: string
+          contact_name?: string | null
+          contact_phone?: string
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+          user_language?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_sessions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contacts: {
+        Row: {
+          created_at: string
+          id: string
+          is_favorite: boolean | null
+          name: string
+          notes: string | null
+          phone_number: string
+          preferred_language: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_favorite?: boolean | null
+          name: string
+          notes?: string | null
+          phone_number: string
+          preferred_language?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_favorite?: boolean | null
+          name?: string
+          notes?: string | null
+          phone_number?: string
+          preferred_language?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       early_access_signups: {
         Row: {
           created_at: string
@@ -67,6 +159,59 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      translations: {
+        Row: {
+          call_session_id: string
+          confidence_score: number | null
+          created_at: string
+          detected_gender: string | null
+          id: string
+          original_text: string
+          source_language: string
+          speaker: string
+          target_language: string
+          translated_text: string
+          user_id: string
+          voice_id: string | null
+        }
+        Insert: {
+          call_session_id: string
+          confidence_score?: number | null
+          created_at?: string
+          detected_gender?: string | null
+          id?: string
+          original_text: string
+          source_language: string
+          speaker: string
+          target_language: string
+          translated_text: string
+          user_id: string
+          voice_id?: string | null
+        }
+        Update: {
+          call_session_id?: string
+          confidence_score?: number | null
+          created_at?: string
+          detected_gender?: string | null
+          id?: string
+          original_text?: string
+          source_language?: string
+          speaker?: string
+          target_language?: string
+          translated_text?: string
+          user_id?: string
+          voice_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "translations_call_session_id_fkey"
+            columns: ["call_session_id"]
+            isOneToOne: false
+            referencedRelation: "call_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

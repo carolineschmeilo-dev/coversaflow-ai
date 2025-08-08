@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Phone, Languages, Mail, LogOut, User, TestTube } from "lucide-react";
+import { Phone, Languages, Mail, LogOut, User, TestTube, Users, History } from "lucide-react";
 import { CallSetup } from "@/components/CallSetup";
 import { ActiveCall } from "@/components/ActiveCall";
 import { GenderDetectionDemo } from "@/components/GenderDetectionDemo";
+import { ContactsManager } from "@/components/ContactsManager";
 import { useAuth } from "@/hooks/useAuth";
 
 interface CallConfiguration {
@@ -14,7 +15,7 @@ interface CallConfiguration {
 }
 
 const Index = () => {
-  const [currentScreen, setCurrentScreen] = useState<'home' | 'setup' | 'call' | 'demo'>('home');
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'setup' | 'call' | 'demo' | 'contacts' | 'history'>('home');
   const [callConfig, setCallConfig] = useState<CallConfiguration | null>(null);
   const { user, signOut } = useAuth();
 
@@ -86,6 +87,50 @@ const Index = () => {
     );
   }
 
+  if (currentScreen === 'contacts') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
+        {/* Header */}
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center space-x-2">
+              <Languages className="w-6 h-6 text-primary" />
+              <span className="font-semibold text-foreground">ConversaFlow</span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setCurrentScreen('home')}
+              >
+                Back to Home
+              </Button>
+              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                <User className="w-4 h-4" />
+                <span>{user?.email}</span>
+              </div>
+              <Button variant="outline" size="sm" onClick={signOut}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Contacts Content */}
+        <div className="container mx-auto px-4 py-8">
+          <ContactsManager 
+            showCallButton={true}
+            onSelectContact={(contact) => {
+              // Pre-fill call setup with selected contact
+              setCurrentScreen('setup');
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
       {/* Header with auth info */}
@@ -125,14 +170,32 @@ const Index = () => {
           </p>
           
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 justify-center mb-12 max-w-4xl mx-auto">
             <Button 
               size="lg" 
               className="px-8 py-4 text-lg"
               onClick={startCallSetup}
             >
               <Phone className="mr-2 h-5 w-5" />
-              Start Translation Call
+              Start Call
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline"
+              className="px-8 py-4 text-lg"
+              onClick={() => setCurrentScreen('contacts')}
+            >
+              <Users className="mr-2 h-5 w-5" />
+              Contacts
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline"
+              className="px-8 py-4 text-lg"
+              onClick={() => setCurrentScreen('history')}
+            >
+              <History className="mr-2 h-5 w-5" />
+              Call History
             </Button>
             <Button 
               size="lg" 
@@ -141,7 +204,7 @@ const Index = () => {
               onClick={() => setCurrentScreen('demo')}
             >
               <TestTube className="mr-2 h-5 w-5" />
-              Try Gender Detection
+              Voice Demo
             </Button>
           </div>
         </div>
