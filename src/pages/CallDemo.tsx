@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Languages, TestTube } from "lucide-react";
+import { ArrowLeft, Languages, TestTube, Clock, AlertTriangle } from "lucide-react";
 import { ActiveCall } from "@/components/ActiveCall";
 import { CallSetup } from "@/components/CallSetup";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DemoLimiter } from "@/utils/demoLimiter";
+import { toast } from "sonner";
 
 interface CallConfiguration {
   myLanguage: string;
@@ -12,10 +15,50 @@ interface CallConfiguration {
 }
 
 const CallDemo = () => {
-  const [currentScreen, setCurrentScreen] = useState<'intro' | 'setup' | 'call'>('intro');
+  const [currentScreen, setCurrentScreen] = useState<'intro' | 'setup' | 'call' | 'blocked'>('intro');
   const [callConfig, setCallConfig] = useState<CallConfiguration | null>(null);
+  const [demoLimitInfo, setDemoLimitInfo] = useState<{ allowed: boolean; remaining: number; reason?: string } | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<number>(300); // 5 minutes
+
+  useEffect(() => {
+    // Check demo limits on component mount
+    const limitCheck = DemoLimiter.canUseDemo();
+    setDemoLimitInfo(limitCheck);
+    
+    if (!limitCheck.allowed) {
+      setCurrentScreen('blocked');
+    }
+  }, []);
+
+  useEffect(() => {
+    // Time tracking for active demo
+    if (currentScreen === 'call') {
+      const startTime = Date.now();
+      const timer = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const remaining = Math.max(0, 300 - elapsed);
+        setTimeRemaining(remaining);
+        
+        if (remaining === 0) {
+          toast.error("Demo time limit reached. Create an account for unlimited access!");
+          endCall();
+        }
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [currentScreen]);
 
   const startSetup = () => {
+    const limitCheck = DemoLimiter.canUseDemo();
+    if (!limitCheck.allowed) {
+      setCurrentScreen('blocked');
+      setDemoLimitInfo(limitCheck);
+      return;
+    }
+    
+    DemoLimiter.trackDemoUsage();
+    DemoLimiter.createDemoSession();
     setCurrentScreen('setup');
   };
 
@@ -25,6 +68,7 @@ const CallDemo = () => {
   };
 
   const endCall = () => {
+    DemoLimiter.endDemoSession();
     setCurrentScreen('intro');
     setCallConfig(null);
   };
@@ -33,16 +77,66 @@ const CallDemo = () => {
     window.location.href = '/auth';
   };
 
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Show blocked screen if demo limit reached
+  if (currentScreen === 'blocked') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center p-4">
+        <div className="max-w-md mx-auto text-center space-y-6">
+          <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto">
+            <AlertTriangle className="w-8 h-8 text-destructive" />
+          </div>
+          
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Demo Limit Reached</h2>
+            <p className="text-muted-foreground mb-4">
+              {demoLimitInfo?.reason || "You've reached the daily demo limit."}
+            </p>
+          </div>
+
+          <Alert>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Create a free account to get unlimited access to all features including contacts, call history, and more.
+            </AlertDescription>
+          </Alert>
+
+          <div className="space-y-3">
+            <Button onClick={goToAuth} className="w-full">
+              Create Free Account
+            </Button>
+            <Button variant="outline" onClick={() => window.location.href = '/'} className="w-full">
+              Back to Home
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Show call interface
   if (currentScreen === 'call' && callConfig) {
     return (
       <div className="relative">
-        {/* Demo banner */}
-        <div className="bg-primary/10 border-b border-primary/20 p-2 text-center">
-          <p className="text-sm">
-            <TestTube className="inline w-4 h-4 mr-1" />
-            <strong>Demo Mode</strong> - Experience the call interface without signing up
-          </p>
+        {/* Demo banner with timer */}
+        <div className="bg-primary/10 border-b border-primary/20 p-2">
+          <div className="flex items-center justify-between max-w-4xl mx-auto">
+            <p className="text-sm">
+              <TestTube className="inline w-4 h-4 mr-1" />
+              <strong>Demo Mode</strong> - Experience the call interface
+            </p>
+            <div className="flex items-center space-x-2 text-sm">
+              <Clock className="w-4 h-4" />
+              <span className={timeRemaining < 60 ? "text-destructive font-medium" : ""}>
+                Time remaining: {formatTime(timeRemaining)}
+              </span>
+            </div>
+          </div>
         </div>
         
         <ActiveCall
@@ -167,9 +261,25 @@ const CallDemo = () => {
             </Button>
           </div>
 
-          {/* Demo Limitations */}
-          <div className="text-xs text-muted-foreground border-t pt-6">
-            <p><strong>Demo Limitations:</strong> No data saved • No contact management • Limited to one session</p>
+          {/* Demo Limitations & Usage */}
+          <div className="bg-muted/30 rounded-xl p-6 mt-8">
+            <div className="flex items-start space-x-3">
+              <AlertTriangle className="w-5 h-5 text-warning mt-0.5" />
+              <div>
+                <h3 className="font-semibold mb-2">Demo Limitations</h3>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• Maximum 3 demos per day</li>
+                  <li>• 5-minute time limit per session</li>
+                  <li>• No data persistence</li>
+                  <li>• Simulated conversation only</li>
+                </ul>
+                {demoLimitInfo && (
+                  <p className="text-sm font-medium mt-2">
+                    Remaining demos today: {demoLimitInfo.remaining}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
