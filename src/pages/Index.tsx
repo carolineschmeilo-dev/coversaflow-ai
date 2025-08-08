@@ -1,19 +1,20 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Phone, Globe, Mic, MessageSquare, MessageCircle, Users, Smartphone } from "lucide-react";
+import { Phone, Globe, Mic, MessageSquare, MessageCircle, Users, Smartphone, PhoneCall } from "lucide-react";
 import { PhoneCallTranslator } from "@/components/PhoneCallTranslator";
 import { ConferenceBridge } from "@/components/ConferenceBridge";
 import { SingleDeviceBridge } from "@/components/SingleDeviceBridge";
+import { AITranslatorService } from "@/components/AITranslatorService";
 import conversaflowLogo from "@/assets/conversaflow-logo-final.png";
 import { EarlyAccessSignup } from "@/components/EarlyAccessSignup";
 
 const Index = () => {
   console.log("Index component rendering");
   const [isInCall, setIsInCall] = useState(false);
-  const [translationMode, setTranslationMode] = useState<"standard" | "conference" | "single">("single");
+  const [translationMode, setTranslationMode] = useState<"standard" | "conference" | "single" | "ai-service">("ai-service");
 
-  const startCall = (mode: "standard" | "conference" | "single" = "single") => {
+  const startCall = (mode: "standard" | "conference" | "single" | "ai-service" = "ai-service") => {
     setTranslationMode(mode);
     setIsInCall(true);
   };
@@ -23,7 +24,9 @@ const Index = () => {
   };
 
   if (isInCall) {
-    if (translationMode === "single") {
+    if (translationMode === "ai-service") {
+      return <AITranslatorService onBack={endCall} />;
+    } else if (translationMode === "single") {
       return <SingleDeviceBridge onEndCall={endCall} />;
     } else if (translationMode === "conference") {
       return <ConferenceBridge onEndCall={endCall} />;
@@ -57,20 +60,20 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg" 
-              onClick={() => startCall("single")}
+              onClick={() => startCall("ai-service")}
               className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <Smartphone className="w-6 h-6 mr-2" />
-              Single Device Translation
+              <Phone className="w-6 h-6 mr-2" />
+              Call AI Translator
             </Button>
             <Button 
               size="lg" 
-              onClick={() => startCall("conference")}
+              onClick={() => startCall("single")}
               variant="outline"
               className="text-lg px-8 py-6 rounded-full border-2 hover:bg-muted transition-all duration-300"
             >
-              <Users className="w-6 h-6 mr-2" />
-              Conference Bridge
+              <Smartphone className="w-6 h-6 mr-2" />
+              Single Device Mode
             </Button>
           </div>
         </div>
@@ -80,11 +83,11 @@ const Index = () => {
           <Card className="p-6 bg-gradient-to-br from-card to-muted/20 border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-4">
               <div className="w-12 h-12 bg-gradient-to-r from-primary to-primary-glow rounded-lg flex items-center justify-center">
-                <Smartphone className="w-6 h-6 text-primary-foreground" />
+                <PhoneCall className="w-6 h-6 text-primary-foreground" />
               </div>
-              <h3 className="text-xl font-semibold">Single Device</h3>
+              <h3 className="text-xl font-semibold">AI Conference Call</h3>
               <p className="text-muted-foreground">
-                Only one person needs the app. Turn-based translation between two people.
+                Call our AI service - it calls the other person and translates live between you both.
               </p>
             </div>
           </Card>
@@ -92,11 +95,11 @@ const Index = () => {
           <Card className="p-6 bg-gradient-to-br from-card to-muted/20 border-accent/10 hover:border-accent/30 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-4">
               <div className="w-12 h-12 bg-gradient-to-r from-accent to-primary rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-accent-foreground" />
+                <Smartphone className="w-6 h-6 text-accent-foreground" />
               </div>
-              <h3 className="text-xl font-semibold">Conference Bridge</h3>
+              <h3 className="text-xl font-semibold">Single Device</h3>
               <p className="text-muted-foreground">
-                Both people have the app. Creates a 3-way translation bridge.
+                Turn-based translation on one device. Tap to switch between languages.
               </p>
             </div>
           </Card>
@@ -122,9 +125,9 @@ const Index = () => {
               <div className="w-16 h-16 bg-gradient-to-r from-primary to-primary-glow rounded-full flex items-center justify-center mx-auto text-2xl font-bold text-primary-foreground">
                 1
               </div>
-              <h3 className="text-xl font-semibold">One Device Needed</h3>
+              <h3 className="text-xl font-semibold">Call AI Service</h3>
               <p className="text-muted-foreground">
-                Only one person needs to install the app. Set up both languages.
+                Simply call our AI translator phone number - no app installation needed.
               </p>
             </div>
 
@@ -132,9 +135,9 @@ const Index = () => {
               <div className="w-16 h-16 bg-gradient-to-r from-accent to-primary rounded-full flex items-center justify-center mx-auto text-2xl font-bold text-accent-foreground">
                 2
               </div>
-              <h3 className="text-xl font-semibold">Take Turns Speaking</h3>
+              <h3 className="text-xl font-semibold">AI Calls Both</h3>
               <p className="text-muted-foreground">
-                Tap "Start" before each person speaks. The app translates and speaks aloud.
+                Tell the AI who to call and what languages. It creates a 3-way call instantly.
               </p>
             </div>
 
@@ -142,9 +145,9 @@ const Index = () => {
               <div className="w-16 h-16 bg-gradient-to-r from-success to-accent rounded-full flex items-center justify-center mx-auto text-2xl font-bold text-success-foreground">
                 3
               </div>
-              <h3 className="text-xl font-semibold">Switch & Repeat</h3>
+              <h3 className="text-xl font-semibold">Talk Naturally</h3>
               <p className="text-muted-foreground">
-                Tap "Switch" to change direction and continue the conversation.
+                The AI translates everything live - no buttons, no apps, just natural conversation.
               </p>
             </div>
           </div>
@@ -160,11 +163,11 @@ const Index = () => {
             </p>
             <Button 
               size="lg" 
-              onClick={() => startCall("single")}
+              onClick={() => startCall("ai-service")}
               className="bg-gradient-to-r from-primary to-accent hover:from-primary-glow hover:to-primary text-lg px-12 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <Smartphone className="w-6 h-6 mr-2" />
-              Try Single Device Translation
+              <PhoneCall className="w-6 h-6 mr-2" />
+              Try AI Conference Call
             </Button>
             
             {/* Download Mobile App Section */}
