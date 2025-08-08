@@ -197,7 +197,7 @@ export function RealTimeTranslator({ onEndCall }: RealTimeTranslatorProps) {
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            ConversaFlow.AI - Live
+            CoversaFlow.AI - Live
           </h1>
           <p className="text-muted-foreground">
             Real-time speech translation powered by AI

@@ -84,7 +84,7 @@ export const ContactPicker = ({ onSelectContact, children }: ContactPickerProps)
             <div>
               <h3 className="font-semibold mb-2">Access Your Phone Book</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Allow ConversaFlow to access your phone book to quickly select who to call.
+                Allow CoversaFlow to access your phone book to quickly select who to call.
               </p>
               <Button onClick={handleRequestPermission}>
                 <Users className="w-4 h-4 mr-2" />

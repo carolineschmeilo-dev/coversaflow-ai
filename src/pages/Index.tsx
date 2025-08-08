@@ -61,7 +61,7 @@ const Index = () => {
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center space-x-2">
               <Languages className="w-6 h-6 text-primary" />
-              <span className="font-semibold text-foreground">ConversaFlow</span>
+              <span className="font-semibold text-foreground">CoversaFlow</span>
             </div>
             <div className="flex items-center space-x-4">
               <Button 
@@ -125,7 +125,7 @@ const Index = () => {
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <Languages className="w-6 h-6 text-primary" />
-            <span className="font-semibold text-foreground">ConversaFlow</span>
+            <span className="font-semibold text-foreground">CoversaFlow</span>
           </div>
           <div className="flex items-center space-x-4">
             {user ? (

@@ -1,6 +1,6 @@
 // Demo usage tracking and limitations
 export class DemoLimiter {
-  private static readonly STORAGE_KEY = 'conversaflow_demo_usage';
+  private static readonly STORAGE_KEY = 'coversaflow_demo_usage';
   private static readonly MAX_DAILY_DEMOS = 3;
   private static readonly DEMO_DURATION_LIMIT = 300; // 5 minutes max
   
@@ -96,7 +96,7 @@ export class DemoLimiter {
   
   private static openIndexedDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open('ConversaFlowDemo', 1);
+      const request = indexedDB.open('CoversaFlowDemo', 1);
       
       request.onerror = () => reject(request.error);
       request.onsuccess = () => resolve(request.result);

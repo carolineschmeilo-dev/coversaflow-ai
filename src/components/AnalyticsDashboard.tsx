@@ -177,7 +177,7 @@ export const AnalyticsDashboard = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h2>
-          <p className="text-muted-foreground">Monitor your ConversaFlow usage and performance.</p>
+          <p className="text-muted-foreground">Monitor your CoversaFlow usage and performance.</p>
         </div>
       </div>
 

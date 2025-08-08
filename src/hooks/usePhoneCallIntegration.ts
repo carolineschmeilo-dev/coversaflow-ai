@@ -113,7 +113,7 @@ export const usePhoneCallIntegration = (): UsePhoneCallIntegrationReturn => {
         if (err.name === 'NotAllowedError') {
           const info = await Device.getInfo();
           if (info.platform === 'android' || info.platform === 'ios') {
-            setError('Microphone permission denied. Please go to your device Settings > Apps > ConversaFlow AI > Permissions and enable Microphone access, then restart the app.');
+            setError('Microphone permission denied. Please go to your device Settings > Apps > CoversaFlow AI > Permissions and enable Microphone access, then restart the app.');
           } else {
             setError('Microphone permission denied. Please allow microphone access when prompted or check your browser settings.');
           }

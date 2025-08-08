@@ -88,7 +88,7 @@ export function EarlyAccessSignup() {
         <div className="space-y-2">
           <h3 className="text-xl font-semibold">Get Updates</h3>
           <p className="text-sm text-muted-foreground">
-            Stay updated on new features, language additions, and improvements to ConversaFlow.AI.
+            Stay updated on new features, language additions, and improvements to CoversaFlow.AI.
           </p>
         </div>
         
