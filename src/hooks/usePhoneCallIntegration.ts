@@ -63,17 +63,26 @@ export const usePhoneCallIntegration = (): UsePhoneCallIntegrationReturn => {
       const hasMediaDevices = 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices;
       const hasWebAudio = 'AudioContext' in window || 'webkitAudioContext' in window;
       
+      console.log('Checking device support:', { hasMediaDevices, hasWebAudio });
+      
       // Support both mobile devices and modern web browsers
       try {
         const info = await Device.getInfo();
+        console.log('Device info:', info);
         // Native mobile apps (iOS/Android) or web browsers with required APIs
-        setIsSupported(hasMediaDevices && hasWebAudio && 
-          (info.platform === 'ios' || info.platform === 'android' || info.platform === 'web'));
-      } catch {
-        // Fallback for web browsers without Capacitor
-        setIsSupported(hasMediaDevices && hasWebAudio);
+        const isSupported = hasMediaDevices && hasWebAudio && 
+          (info.platform === 'ios' || info.platform === 'android' || info.platform === 'web');
+        console.log('Platform support result:', isSupported);
+        setIsSupported(isSupported);
+      } catch (error) {
+        console.log('Device.getInfo failed, using fallback:', error);
+        // Fallback for web browsers without Capacitor - should still work in Capacitor app
+        const fallbackSupport = hasMediaDevices && hasWebAudio;
+        console.log('Fallback support result:', fallbackSupport);
+        setIsSupported(fallbackSupport);
       }
     } catch (err) {
+      console.error('checkSupport error:', err);
       setIsSupported(false);
     }
   }, []);
