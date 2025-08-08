@@ -15,6 +15,9 @@ const config: CapacitorConfig = {
       splashFullScreen: true,
       splashImmersive: true,
     },
+    Contacts: {
+      // Contact permissions configuration
+    },
   },
 };
 

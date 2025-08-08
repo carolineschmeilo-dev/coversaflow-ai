@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Phone, Languages, ArrowRight } from 'lucide-react';
+import { Phone, Languages, ArrowRight, Users } from 'lucide-react';
+import { ContactPicker } from './ContactPicker';
 
 interface CallSetupProps {
   onStartCall: (setup: CallConfiguration) => void;
@@ -34,8 +35,14 @@ export const CallSetup: React.FC<CallSetupProps> = ({ onStartCall }) => {
   const [myLanguage, setMyLanguage] = useState<string>('');
   const [theirLanguage, setTheirLanguage] = useState<string>('');
   const [theirPhoneNumber, setTheirPhoneNumber] = useState<string>('');
+  const [contactName, setContactName] = useState<string>('');
   // In a real app, this would come from user profile
   const [myPhoneNumber] = useState<string>('+1 (555) 123-4567'); // Pre-populated
+
+  const handleContactSelect = (phoneNumber: string, name?: string) => {
+    setTheirPhoneNumber(phoneNumber);
+    setContactName(name || '');
+  };
 
   const handleStartCall = () => {
     if (myLanguage && theirLanguage && theirPhoneNumber) {
@@ -109,15 +116,26 @@ export const CallSetup: React.FC<CallSetupProps> = ({ onStartCall }) => {
 
             <div className="space-y-2">
               <Label htmlFor="theirPhoneNumber">Who do you want to call?</Label>
-              <Input
-                id="theirPhoneNumber"
-                type="tel"
-                placeholder="Enter phone number or search contacts"
-                value={theirPhoneNumber}
-                onChange={(e) => setTheirPhoneNumber(e.target.value)}
-              />
+              <div className="flex space-x-2">
+                <Input
+                  id="theirPhoneNumber"
+                  type="tel"
+                  placeholder="Enter phone number or select from contacts"
+                  value={contactName ? `${contactName} (${theirPhoneNumber})` : theirPhoneNumber}
+                  onChange={(e) => {
+                    setTheirPhoneNumber(e.target.value);
+                    setContactName('');
+                  }}
+                  className="flex-1"
+                />
+                <ContactPicker onSelectContact={handleContactSelect}>
+                  <Button variant="outline" size="icon" type="button">
+                    <Users className="w-4 h-4" />
+                  </Button>
+                </ContactPicker>
+              </div>
               <p className="text-xs text-muted-foreground">
-                📞 In the mobile app, you can select from your contacts
+                📞 In the mobile app, tap the contacts button to select from your phone's contacts
               </p>
             </div>
 
