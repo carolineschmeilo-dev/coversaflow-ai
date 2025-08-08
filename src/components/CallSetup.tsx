@@ -34,10 +34,11 @@ export const CallSetup: React.FC<CallSetupProps> = ({ onStartCall }) => {
   const [myLanguage, setMyLanguage] = useState<string>('');
   const [theirLanguage, setTheirLanguage] = useState<string>('');
   const [theirPhoneNumber, setTheirPhoneNumber] = useState<string>('');
-  const [myPhoneNumber, setMyPhoneNumber] = useState<string>('');
+  // In a real app, this would come from user profile
+  const [myPhoneNumber] = useState<string>('+1 (555) 123-4567'); // Pre-populated
 
   const handleStartCall = () => {
-    if (myLanguage && theirLanguage && theirPhoneNumber && myPhoneNumber) {
+    if (myLanguage && theirLanguage && theirPhoneNumber) {
       onStartCall({
         myLanguage,
         theirLanguage,
@@ -47,7 +48,7 @@ export const CallSetup: React.FC<CallSetupProps> = ({ onStartCall }) => {
     }
   };
 
-  const isValid = myLanguage && theirLanguage && theirPhoneNumber && myPhoneNumber;
+  const isValid = myLanguage && theirLanguage && theirPhoneNumber;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 p-4">
@@ -68,15 +69,19 @@ export const CallSetup: React.FC<CallSetupProps> = ({ onStartCall }) => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* User's phone number - pre-populated */}
             <div className="space-y-2">
               <Label htmlFor="myPhoneNumber">Your Phone Number</Label>
               <Input
                 id="myPhoneNumber"
                 type="tel"
-                placeholder="+1 (555) 123-4567"
                 value={myPhoneNumber}
-                onChange={(e) => setMyPhoneNumber(e.target.value)}
+                disabled
+                className="bg-muted"
               />
+              <p className="text-xs text-muted-foreground">
+                📱 In the mobile app, this is automatically detected from your device
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -103,14 +108,17 @@ export const CallSetup: React.FC<CallSetupProps> = ({ onStartCall }) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="theirPhoneNumber">Recipient's Phone Number</Label>
+              <Label htmlFor="theirPhoneNumber">Who do you want to call?</Label>
               <Input
                 id="theirPhoneNumber"
                 type="tel"
-                placeholder="+34 123 456 789"
+                placeholder="Enter phone number or search contacts"
                 value={theirPhoneNumber}
                 onChange={(e) => setTheirPhoneNumber(e.target.value)}
               />
+              <p className="text-xs text-muted-foreground">
+                📞 In the mobile app, you can select from your contacts
+              </p>
             </div>
 
             <div className="space-y-2">
