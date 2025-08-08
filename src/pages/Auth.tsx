@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Languages, Mail, Lock, TestTube } from "lucide-react";
+import { Loader2, Languages, Mail, Lock } from "lucide-react";
 import { toast } from "sonner";
 import type { Session } from "@supabase/supabase-js";
 
@@ -275,21 +275,6 @@ const Auth = () => {
             </Tabs>
           </CardContent>
         </Card>
-        
-        {/* Demo Option */}
-        <div className="text-center mt-6">
-          <p className="text-sm text-muted-foreground mb-3">
-            Want to try without signing up?
-          </p>
-          <Button 
-            variant="outline" 
-            onClick={() => window.location.href = '/demo'}
-            className="w-full"
-          >
-            <TestTube className="mr-2 h-4 w-4" />
-            Try Demo (No Registration)
-          </Button>
-        </div>
       </div>
     </div>
   );

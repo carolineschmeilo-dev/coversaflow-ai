@@ -128,7 +128,7 @@ const CallDemo = () => {
           <div className="flex items-center justify-between max-w-4xl mx-auto">
             <p className="text-sm">
               <TestTube className="inline w-4 h-4 mr-1" />
-              <strong>Demo Mode</strong> - Experience the call interface
+              <strong>Interactive Demo</strong> - Exploring the interface
             </p>
             <div className="flex items-center space-x-2 text-sm">
               <Clock className="w-4 h-4" />
@@ -193,11 +193,11 @@ const CallDemo = () => {
               </div>
             </div>
             <h1 className="text-4xl font-bold text-foreground mb-4">
-              Try ConversaFlow
-              <span className="block text-2xl text-primary mt-2">No Registration Required</span>
+              See How ConversaFlow Works
+              <span className="block text-2xl text-primary mt-2">Interactive Demo</span>
             </h1>
             <p className="text-xl text-muted-foreground">
-              Experience real-time AI translation with gender-matched voices before signing up
+              Explore our AI translation interface and features in this interactive demonstration
             </p>
           </div>
 
@@ -207,9 +207,9 @@ const CallDemo = () => {
               <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto">
                 <Languages className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold mb-2">Live Translation</h3>
+              <h3 className="font-semibold mb-2">Interface Preview</h3>
               <p className="text-sm text-muted-foreground">
-                See real-time translation between 10+ languages
+                See how our translation interface works with 10+ languages
               </p>
             </div>
             
@@ -242,11 +242,11 @@ const CallDemo = () => {
               onClick={startSetup}
             >
               <TestTube className="mr-2 h-5 w-5" />
-              Start Demo Call
+              Explore the Interface
             </Button>
             
             <p className="text-sm text-muted-foreground">
-              No signup required • Full feature demo • Takes 2 minutes
+              No signup required • Interactive demo • Takes 2 minutes
             </p>
           </div>
 

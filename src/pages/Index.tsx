@@ -201,10 +201,10 @@ const Index = () => {
               size="lg" 
               variant="outline"
               className="px-8 py-4 text-lg"
-              onClick={() => setCurrentScreen('demo')}
+              onClick={() => window.location.href = '/demo'}
             >
               <TestTube className="mr-2 h-5 w-5" />
-              Voice Demo
+              See How It Works
             </Button>
           </div>
         </div>
