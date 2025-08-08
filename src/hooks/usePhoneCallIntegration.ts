@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Device } from '@capacitor/device';
+import { Capacitor } from '@capacitor/core';
 
 interface CallState {
   isActive: boolean;
@@ -72,7 +73,16 @@ export const usePhoneCallIntegration = (): UsePhoneCallIntegrationReturn => {
 
   const requestPermissions = useCallback(async (): Promise<boolean> => {
     try {
-      // Request microphone permission
+      // Check if we're in a Capacitor native app
+      const info = await Device.getInfo();
+      const isNativeApp = Capacitor.isNativePlatform();
+      
+      if (isNativeApp) {
+        // For native apps, provide clearer error messages
+        console.log('Requesting microphone permission on native platform:', info.platform);
+      }
+      
+      // Request microphone permission through web API (works in both web and Capacitor)
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           echoCancellation: true,
@@ -87,7 +97,24 @@ export const usePhoneCallIntegration = (): UsePhoneCallIntegrationReturn => {
       
       return true;
     } catch (err) {
-      setError('Microphone permission denied. Please enable microphone access.');
+      if (err instanceof Error) {
+        if (err.name === 'NotAllowedError') {
+          const info = await Device.getInfo();
+          if (info.platform === 'android' || info.platform === 'ios') {
+            setError('Microphone permission denied. Please go to your device Settings > Apps > ConversaFlow AI > Permissions and enable Microphone access.');
+          } else {
+            setError('Microphone permission denied. Please allow microphone access when prompted or check your browser settings.');
+          }
+        } else if (err.name === 'NotFoundError') {
+          setError('No microphone found. Please ensure your device has a microphone and try again.');
+        } else if (err.name === 'NotReadableError') {
+          setError('Microphone is being used by another application. Please close other apps using the microphone and try again.');
+        } else {
+          setError(`Microphone access failed: ${err.message}`);
+        }
+      } else {
+        setError('Failed to access microphone. Please check your device settings and try again.');
+      }
       return false;
     }
   }, []);
