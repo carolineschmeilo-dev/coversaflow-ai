@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Phone, Languages, Mail } from "lucide-react";
+import { Phone, Languages, Mail, LogOut, User } from "lucide-react";
 import { CallSetup } from "@/components/CallSetup";
 import { ActiveCall } from "@/components/ActiveCall";
+import { useAuth } from "@/hooks/useAuth";
 
 interface CallConfiguration {
   myLanguage: string;
@@ -14,6 +15,7 @@ interface CallConfiguration {
 const Index = () => {
   const [currentScreen, setCurrentScreen] = useState<'home' | 'setup' | 'call'>('home');
   const [callConfig, setCallConfig] = useState<CallConfiguration | null>(null);
+  const { user, signOut } = useAuth();
 
   const startCallSetup = () => {
     setCurrentScreen('setup');
@@ -47,6 +49,26 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
+      {/* Header with auth info */}
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <Languages className="w-6 h-6 text-primary" />
+            <span className="font-semibold text-foreground">ConversaFlow</span>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <User className="w-4 h-4" />
+              <span>{user?.email}</span>
+            </div>
+            <Button variant="outline" size="sm" onClick={signOut}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
